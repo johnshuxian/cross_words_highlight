@@ -270,7 +270,7 @@ document.addEventListener('click', e => {
         layer.msg("删除成功")
 
         $("#annotation-editor").remove();
-    }else if ($ele.id === 'johns') {
+    }else if ($ele.classList.contains("gtx-johns-icon")) {
         console.log($($ele).text())
         const selection = window.getSelection();
         if (selection.isCollapsed) {
@@ -278,6 +278,7 @@ document.addEventListener('click', e => {
         }
         highlighter.fromRange(selection.getRangeAt(0));
         window.getSelection().removeAllRanges();
+        $("#johns").remove()
     }else if(!$ele.classList.contains('highlight-mengshou-wrap')){
         $("#annotation-editor").remove();
     }
@@ -298,23 +299,24 @@ document.addEventListener('mouseover', e => {
     }
 });
 
-function buildButton(){
-    $("body").append("<div style='z-index: 10000000;border: none;width: 100px;height: 50px;position: fixed;right: 1px;top: 120px'><button id='johns' style='cursor: pointer;\n" +
-        "    position: relative;\n" +
-        "    color: #fff;\n" +
-        "    font-size: 14px;\n" +
-        "    display: block;\n" +
-        "    width: 70px;\n" +
-        "    height: 40px;\n" +
-        "    line-height: 36px;\n" +
-        "    text-align: center;\n" +
-        "    background: #fbc4c4;\n" +
-        "    padding: 0;\n" +
-        "    margin: 0;\n" +
-        "    min-width: 70px;\n" +
-        "    min-height: 40px;\n" +
-        "    border-radius: 4px;border: none\n'>手动高亮</button></div>")
+document.addEventListener('mouseup', e => {
+    let text = getSelectedText().toString()
+
+    let $ele = e.target
+
+    if(!$ele.classList.contains("gtx-johns-icon")){
+        $("#johns").remove()
+
+        if(text){
+            let sh = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+            let left = (e.clientX - 40 < 0) ? e.clientX + 20 : e.clientX - 40, top = (e.clientY - 40 < 0) ? e.clientY + sh + 20 : e.clientY + sh - 40;
+            buildButton(left+20,top+8)
+        }
+    }
+});
+
+function buildButton(left,top){
+    $("body").append("<div id=\"johns\" style=\"position: absolute; left: "+left+"px; top: "+top+"px;\"><a href='javascript:void(0)' class=\"gtx-johns-icon\">🔖</a></div>")
 }
 // auto-highlight selections
 highlighter.stop()
-buildButton()
