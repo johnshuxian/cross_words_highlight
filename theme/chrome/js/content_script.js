@@ -114,15 +114,38 @@ function copyToClipboard(t) {
 }
 
 function createHtml(left,top,id){
-    $("#annotation-editor").remove();
+    $("#johns-editor").remove();
 
     let display = localStorage.getItem(id)?'list-item':'none';
 
-    // let html = "<div id=\"annotation-editor\" data-id='"+id+"' style=\"left: "+left+"px; top: "+top+"px; display: block;\"><ul class=\"dropdown-list\"><li class=\"colors\" style=\"display: list-item;\"><span data-color=\"yellow\" class=\"js-color-picker color yellow active\"></span><span data-color=\"green\" class=\"js-color-picker color green \"></span><span data-color=\"pink\" class=\"js-color-picker color pink \"></span><span data-color=\"blue\" class=\"js-color-picker color blue \"></span></li><li style='text-align: center'><a  onclick='return false;'  href=\"#\" class=\"js-copy\">复制</a></li><li class=\"js-remove-annotation-wrapper\" style=\"display: list-item;text-align: center\"><a href=\"#\" onclick='return false;' class=\"js-remove-annotation\">移除高亮</a></li><li style='text-align: center'><a  onclick='return false;'  href=\"#\" class=\"js-input\">相关批注</a></li><li style='text-align: center;display: "+display+"'><a  onclick='return false;'  href=\"#\" class=\"js-input-delete\">删除批注</a></li></ul></div>"
-    let html = "<div id=\"annotation-editor\" data-id='"+id+"' style=\"left: "+left+"px; top: "+top+"px; display: block;\"><ul class=\"dropdown-list\"><li style='text-align: center'><a  onclick='return false;'  href=\"#\" class=\"js-copy\">复制</a></li><li class=\"js-remove-annotation-wrapper\" style=\"display: list-item;text-align: center\"><a href=\"#\" onclick='return false;' class=\"js-remove-annotation\">移除高亮</a></li><li style='text-align: center'><a  onclick='return false;'  href=\"#\" class=\"js-input\">相关批注</a></li><li style='text-align: center;display: "+display+"'><a  onclick='return false;'  href=\"#\" class=\"js-input-delete\">删除批注</a></li></ul></div>"
+    let html = "<div id=\"johns-editor\" data-id='"+id+"' style=\"z-index:100000000;left: "+left+"px; top: "+top+"px; display: block;\"><ul class=\"dropdown-list\"><li style='text-align: center'><a  onclick='return false;'  href=\"#\" class=\"js-copy\">复制</a></li><li class=\"js-remove-annotation-wrapper\" style=\"display: list-item;text-align: center\"><a href=\"#\" onclick='return false;' class=\"js-remove-annotation\">移除高亮</a></li><li style='text-align: center'><a  onclick='return false;'  href=\"#\" class=\"js-input\">相关批注</a></li><li style='text-align: center;display: "+display+"'><a  onclick='return false;'  href=\"#\" class=\"js-input-delete\">删除批注</a></li></ul></div>"
 
     $("body").prepend(html)
 }
+
+/**
+ * 锚点调转
+ * @param id
+ */
+function goto(id){
+    let position = getPosition(highlighter.getDoms(id)[0])
+    console.log(position)
+    window.scrollTo(position.left,position.top-window.screen.availHeight/2);
+}
+
+function mySort(a,b){
+    if(a.top !== b.top){
+        return a.top < b.top ? -1 : 1;
+    }
+
+     if(a.left !== b.left){
+        return a.left < b.left ? -1 : 1;
+    }
+
+    return -1;
+}
+
+buildAnchor()
 
 const highlighter = new Highlighter({
     wrapTag: 'i',
@@ -163,11 +186,38 @@ highlighter
     .on(Highlighter.event.CREATE, ({sources}) => {
         log('create -', sources);
 
-        $("#annotation-editor").remove();
+        $("#johns-editor").remove();
+
         sources.forEach(s => {
-            // const position = getPosition(highlighter.getDoms(s.id)[0]);
-            // createHtml(position.left-20,position.top-20,s.id)
-            // createTag(position.top, position.left, s.id);
+            //增加锚点
+            let position = getPosition(highlighter.getDoms(s.id)[0])
+
+            let selector = $("#johns-tags>li")
+
+            let arr = []
+
+            selector.each(function (index,v){
+                let left = v.getAttribute('data-left')
+                let top = v.getAttribute('data-top')
+
+                arr.push({left:parseInt(left),top:parseInt(top),id:$(v).children('a').attr('id')});
+            })
+
+            arr.push({left:position.left,top:position.top,id:s.id})
+
+            arr.sort(mySort)
+
+            let index = arr.findIndex(function (v) {
+                return v.id === s.id
+            })
+
+            console.log(index,s.id,arr)
+
+            if(index > 0){
+                $("#johns-tags").children("li:eq("+(index-1)+")").after("<li data-left='"+position.left+"' data-top='"+position.top+"'><span></span><a id='"+s.id+"' href=\"javascript:void(0);\" title='"+s.text+"...' class='johns-tag-goto'>"+s.text.slice(0,10)+"...</a></li>")
+            }else{
+                $("#johns-tags").prepend("<li data-left='"+position.left+"' data-top='"+position.top+"'><span></span><a id='"+s.id+"' href=\"javascript:void(0);\" title='"+s.text+"...' class='johns-tag-goto'>"+s.text.slice(0,10)+"...</a></li>")
+            }
         });
         sources = sources.map(hs => ({hs}));
         store.save(sources);
@@ -229,15 +279,16 @@ document.addEventListener('click', e => {
     // delete highlight
     if ($ele.classList.contains('js-remove-annotation')) {
 
-        const id = $($ele).parents("#annotation-editor").attr("data-id")
+        const id = $($ele).parents("#johns-editor").attr("data-id")
 
         localStorage.removeItem(id)
         log('*click remove-tip*', id);
         highlighter.removeClass('highlight-wrap-hover', id);
         highlighter.remove(id);
-        $("#annotation-editor").remove();
+        $("a#"+id).parent().remove()
+        $("#johns-editor").remove();
     }else if($ele.classList.contains('js-copy')){
-        const id = $($ele).parents("#annotation-editor").attr("data-id")
+        const id = $($ele).parents("#johns-editor").attr("data-id")
         let text = ''
 
         highlighter.getDoms(id).forEach(function (i){
@@ -247,9 +298,9 @@ document.addEventListener('click', e => {
         copyToClipboard(text)
         // highlighter.removeClass('highlight-wrap-hover', id);
         // highlighter.remove(id);
-        $("#annotation-editor").remove();
+        $("#johns-editor").remove();
     }else if($ele.classList.contains('js-input')){
-        const id = $($ele).parents("#annotation-editor").attr("data-id")
+        const id = $($ele).parents("#johns-editor").attr("data-id")
         let text = localStorage.getItem(id)
 
         layer.prompt({title: '批注',value:text, formType: 2}, function(pass, index){
@@ -261,15 +312,15 @@ document.addEventListener('click', e => {
             layer.close(index);
         });
 
-        $("#annotation-editor").remove();
+        $("#johns-editor").remove();
     }else if($ele.classList.contains('js-input-delete')){
-        const id = $($ele).parents("#annotation-editor").attr("data-id")
+        const id = $($ele).parents("#johns-editor").attr("data-id")
 
         localStorage.removeItem(id)
 
         layer.msg("删除成功")
 
-        $("#annotation-editor").remove();
+        $("#johns-editor").remove();
     }else if ($ele.classList.contains("gtx-johns-icon")) {
         console.log($($ele).text())
         const selection = window.getSelection();
@@ -279,23 +330,34 @@ document.addEventListener('click', e => {
         highlighter.fromRange(selection.getRangeAt(0));
         window.getSelection().removeAllRanges();
         $("#johns").remove()
+    }else if($ele.classList.contains('johns-tag-goto')){
+        if($ele.id){
+            //锚点跳转
+            goto($ele.id)
+        }
     }else if(!$ele.classList.contains('highlight-mengshou-wrap')){
-        $("#annotation-editor").remove();
+        $("#johns-editor").remove();
     }
 });
 
 let hoveredTipId;
 document.addEventListener('mouseover', e => {
     const $ele = e.target;
+
     // toggle highlight hover state
     if ($ele.classList.contains('highlight-mengshou-wrap') && hoveredTipId !== $ele.dataset.id) {
         hoveredTipId = $ele.dataset.id;
         highlighter.removeClass('highlight-wrap-hover');
         highlighter.addClass('highlight-wrap-hover', hoveredTipId);
-    }
-    else if (!$ele.classList.contains('highlight-mengshou-wrap')) {
+    }else if($ele.id === 'johns-ex-navbar'){
+        $("#johns-ex-navbar>ul").show()
+    } else if (!$ele.classList.contains('highlight-mengshou-wrap')) {
         highlighter.removeClass('highlight-wrap-hover', hoveredTipId);
         hoveredTipId = null;
+
+        if($($ele).parents("div[id='johns-ex-navbar']").length === 0){
+            $("#johns-ex-navbar>ul").hide()
+        }
     }
 });
 
@@ -316,7 +378,17 @@ document.addEventListener('mouseup', e => {
 });
 
 function buildButton(left,top){
-    $("body").append("<div id=\"johns\" style=\"position: absolute; left: "+left+"px; top: "+top+"px;\"><a href='javascript:void(0)' class=\"gtx-johns-icon\">🔖</a></div>")
+    $("body").append("<div id=\"johns\" style=\"z-index:9999999999;position: absolute; left: "+left+"px; top: "+top+"px;\"><a href='javascript:void(0)' class=\"gtx-johns-icon\">🔖</a></div>")
 }
+
+function buildAnchor(){
+    let html = "<div id=\"johns-ex-navbar\"><i class=\"johns-fa\">📑</i>" +
+        "<ul id='johns-tags' style='padding-top: 5px'>" +
+        "</ul>" +
+        "</div>";
+
+    $("body").append(html)
+}
+
 // auto-highlight selections
 highlighter.stop()

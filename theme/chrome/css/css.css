@@ -3688,19 +3688,19 @@ li {
     cursor: pointer
 }
 
-#annotation-editor .colors .color.yellow {
+#johns-editor .colors .color.yellow {
     background: #ffde70
 }
 
-#annotation-editor .colors .color.green {
+#johns-editor .colors .color.green {
     background: #c4f5aa
 }
 
-#annotation-editor .colors .color.pink {
+#johns-editor .colors .color.pink {
     background: #fd99bb
 }
 
-#annotation-editor .colors .color.blue {
+#johns-editor .colors .color.blue {
     background: #b4ffeb
 }
 
@@ -3725,13 +3725,13 @@ li {
     padding: 4px 0
 }
 
-#annotation-editor .errors {
+#johns-editor .errors {
     font-size: .9em;
     padding: 10px;
     line-height: 28px
 }
 
-#annotation-editor {
+#johns-editor {
     margin-top: 50px;
     position: relative;
     font-family: Helvetica Neue, Helvetica, sans-serif;
@@ -3742,12 +3742,12 @@ li {
     z-index: 2
 }
 
-#annotation-editor:after {
+#johns-editor:after {
     top: -9px;
     border-color: transparent transparent #fff
 }
 
-#annotation-editor:after, #annotation-editor:before {
+#johns-editor:after, #johns-editor:before {
     content: "";
     position: absolute;
     left:10px;
@@ -3757,18 +3757,18 @@ li {
     border-width: 0 10px 10px
 }
 
-#annotation-editor:before {
+#johns-editor:before {
     top: -10px;
     border-color: transparent transparent #bbb
 }
 
-#annotation-editor div.awesomplete > ul > li {
+#johns-editor div.awesomplete > ul > li {
     position: relative;
     padding: .2em .5em;
     cursor: pointer
 }
 
-#annotation-editor .dropdown-list {
+#johns-editor .dropdown-list {
     background: #fff;
     display: inline-block;
     width: 180px;
@@ -3782,17 +3782,17 @@ li {
     z-index: 10
 }
 
-#annotation-editor .dropdown-list li {
+#johns-editor .dropdown-list li {
     border-bottom: 1px solid #eee;
     position: relative;
     padding: 0 10px
 }
 
-#annotation-editor .dropdown-list li.js-remove-annotation-wrapper {
+#johns-editor .dropdown-list li.js-remove-annotation-wrapper {
     display: none
 }
 
-#annotation-editor .dropdown-list li a, #annotation-editor .dropdown-list li span.link {
+#johns-editor .dropdown-list li a, #johns-editor .dropdown-list li span.link {
     padding: 5px 0;
     text-decoration: none;
     display: block;
@@ -3804,32 +3804,32 @@ li {
     cursor: pointer
 }
 
-#annotation-editor .dropdown-list li:hover {
+#johns-editor .dropdown-list li:hover {
     background-color: #eee;
     color: #888
 }
 
-#annotation-editor .dropdown-list li:hover .sub-list {
+#johns-editor .dropdown-list li:hover .sub-list {
     display: block
 }
 
-#annotation-editor .dropdown-list li.js-facebook-share {
+#johns-editor .dropdown-list li.js-facebook-share {
     display: none
 }
 
-#annotation-editor .dropdown-list li.note-input {
+#johns-editor .dropdown-list li.note-input {
     padding: 10px
 }
 
-#annotation-editor .dropdown-list li.note-input:hover {
+#johns-editor .dropdown-list li.note-input:hover {
     background: transparent
 }
 
-#annotation-editor .dropdown-list li.note-input form {
+#johns-editor .dropdown-list li.note-input form {
     margin: 0
 }
 
-#annotation-editor .dropdown-list li.note-input input[type=text], #annotation-editor .dropdown-list li.note-input textarea {
+#johns-editor .dropdown-list li.note-input input[type=text], #johns-editor .dropdown-list li.note-input textarea {
     font-size: 12px;
     color: #ddd;
     border-width: 0;
@@ -3844,17 +3844,17 @@ li {
     margin-bottom: 5px
 }
 
-#annotation-editor .dropdown-list li.note-input input[type=text]:focus, #annotation-editor .dropdown-list li.note-input textarea:focus {
+#johns-editor .dropdown-list li.note-input input[type=text]:focus, #johns-editor .dropdown-list li.note-input textarea:focus {
     border-color: #4d90fe;
     -webkit-box-shadow: 0 0 1px rgba(77, 144, 254, .2);
     box-shadow: 0 0 1px rgba(77, 144, 254, .2)
 }
 
-#annotation-editor .dropdown-list li.note-input textarea {
+#johns-editor .dropdown-list li.note-input textarea {
     max-height: 100px
 }
 
-#annotation-editor .dropdown-list li.note-input #add-button {
+#johns-editor .dropdown-list li.note-input #add-button {
     height: 22px;
     width: 80px;
     font-size: 12px;
@@ -3867,22 +3867,22 @@ li {
     margin-top: 10px
 }
 
-#annotation-editor .dropdown-list li .sub-list {
+#johns-editor .dropdown-list li .sub-list {
     display: none;
     position: absolute;
     top: 0;
     right: -182px
 }
 
-#annotation-editor .dropdown-list li.colors {
+#johns-editor .dropdown-list li.colors {
     padding: 8px 10px
 }
 
-#annotation-editor .dropdown-list li.colors:hover {
+#johns-editor .dropdown-list li.colors:hover {
     background: transparent
 }
 
-#annotation-editor .dropdown-list li.colors .color {
+#johns-editor .dropdown-list li.colors .color {
     width: 20px;
     height: 20px;
     padding: 0;
@@ -3895,11 +3895,11 @@ li {
     cursor: pointer
 }
 
-#annotation-editor .dropdown-list li.colors .color.active, #annotation-editor .dropdown-list li.colors .color.active:hover {
+#johns-editor .dropdown-list li.colors .color.active, #johns-editor .dropdown-list li.colors .color.active:hover {
     border-color: #6e6e6e
 }
 
-#annotation-editor .dropdown-list li.colors .color:hover {
+#johns-editor .dropdown-list li.colors .color:hover {
     border-color: #a2a2a2
 }
 
@@ -4050,4 +4050,61 @@ h1 + blockquote p {
     background-size: 19px;
     height: 19px;
     width: 19px;
+}
+
+#johns-ex-navbar {
+    line-height: 18px;
+    min-height: 18px;
+    background-color: #fafafa;
+    border: 1px solid rgba(0, 0, 0, .07);
+    border-radius: 1px;
+    -webkit-box-shadow: 0 6px 12px rgb(0 0 0 / 18%);
+    box-shadow: 0 6px 12px rgb(0 0 0 / 18%);
+    background-clip: padding-box;
+    padding: 5px 10px;
+    position: fixed;
+    /* background-color: rgba(255,255,255,0.98); */
+    right: 50px;
+    top: 68px;
+    font-size: 12px;
+    white-space: nowrap;
+    z-index: 9999999999999;
+    cursor: pointer;
+    text-align: right;
+    max-height: 70%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    /*opacity:0.5;*/
+}
+
+#johns-ex-navbar ul {
+    display: none;
+    text-align: left;
+    padding-right: 10px;
+    padding-left: 0px;
+    /*list-style-type: disc !important;*/
+    /*list-style: disc inside !important;*/
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    padding-inline-start: 10px;
+}
+
+#johns-ex-navbar li {
+    padding-bottom: 15px;
+    font-size: 6px;
+    text-align: left;
+    list-style-type: disc !important;
+    list-style: disc inside !important;
+    /*border: 1px;*/
+}
+
+.johns-fa {
+    display: inline-block;
+    font: normal normal normal 14px/1 FontAwesome;
+    font-size: inherit;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
