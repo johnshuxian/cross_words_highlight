@@ -48,24 +48,18 @@
             <el-table-column type="expand">
                 <template slot-scope="props">
                     <el-form label-position="left" inline class="demo-table-expand" >
+                        <el-form-item label="高亮数">
+                            <span>{{ props.row.nums }}</span>
+                        </el-form-item>
+                        <el-form-item label="批注数">
+                            <span>{{ props.row.commentNums }}</span>
+                        </el-form-item>
                         <el-form-item label="名称">
                             <span>{{ props.row.title }}</span>
                         </el-form-item>
-                        <el-form-item label="类型">
-                            <span>{{ props.row.type }}</span>
-                        </el-form-item>
-                        <el-form-item label="平台">
-                            <span>{{ props.row.station }}</span>
-                        </el-form-item>
-                        <el-form-item label="最新集数">
-                            <span>{{ props.row.lastNew }}</span>
-                        </el-form-item>
                         <el-form-item label="详情页">
-                            <el-link @click="openUrl(props.row.detail)">{{ props.row.detail }}</el-link>
+                            <el-link @click="openUrl(props.row.href)">{{ props.row.href }}</el-link>
 <!--                            <span>{{ props.row.detail }}</span>-->
-                        </el-form-item>
-                        <el-form-item label="描述" style="width: 90%">
-                            <span>{{ props.row.desc }}</span>
                         </el-form-item>
 <!--                        <el-form-item label="观看地址">-->
 <!--                            <span>{{ props.row.href }}</span>-->
@@ -75,16 +69,17 @@
             </el-table-column>
             <el-table-column
                     label="名称"
+                    style="width: 100px"
                     prop="title">
             </el-table-column>
             <el-table-column
-                    label="最新集数"
-                    prop="lastNew">
+                    label="高亮数"
+                    prop="nums">
             </el-table-column>
             <el-table-column
                     label="封面">
                 <template slot-scope="scope">
-                    <el-image style="width: 80px" :src="scope.row.images" :preview-src-list="[scope.row.images]">
+                    <el-image style="width: 10px" :src="scope.row.icon" :preview-src-list="[scope.row.icon]">
                         <div slot="error" class="image-slot">
                             <i class="el-icon-picture-outline"></i>
                         </div>
@@ -93,20 +88,12 @@
 
             </el-table-column>
             <el-table-column
-                    label="平台"
-                    prop="station">
-            </el-table-column>
-            <el-table-column
-                    label="类型"
-                    prop="type">
-            </el-table-column>
-            <el-table-column
 
                     label="操作"
-                    width="150">
+                    width="100">
                 <template slot-scope="scope">
-                    <el-button @click="openUrl(scope.row.href)" type="text" size="small">继续观看</el-button>
-                    <el-button type="text" @click="del(scope.row.detail)" size="small">删除</el-button>
+                    <el-button @click="openUrl(scope.row.href)" type="text" size="small">查看</el-button>
+                    <el-button type="text" @click="del(scope.row.href)" size="small">删除</el-button>
                     <!--                    <el-button type="text" size="small">编辑</el-button>-->
                 </template>
             </el-table-column>

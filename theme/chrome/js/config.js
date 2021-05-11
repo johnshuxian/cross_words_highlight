@@ -2,13 +2,33 @@ let lists = {};
 
 async function getData(){
     const res = await new Promise(((resolve, reject) => {
-        chrome.storage.sync.get(['video_list_keys'], function (list){
-            list = list.video_list_keys
+        chrome.storage.sync.get(null, function (list){
+            let info = [];
+            for (let key in list){
+                let nums = list[key].length
+                let commentNums = 0
 
-            if(list){
-                chrome.storage.sync.get(list, function (info){
-                    resolve(info)
+                let info_i = {href:'',title:'',nums:nums,commentNums:0,icon:''}
+
+                list[key].forEach(function (v){
+                    if(v.hs.comment){
+                        console.log(111)
+                        commentNums++
+                    }
+
+                    info_i.href = v.hs.href
+                    info_i.title = v.hs.title
+                    info_i.icon = v.hs.icon
                 })
+
+                info_i.commentNums = commentNums
+
+                info.push(info_i)
+            }
+            // list = list.video_list_keys
+            //
+            if(list){
+                resolve(info)
             }else{
                 resolve({})
             }
