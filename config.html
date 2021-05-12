@@ -15,21 +15,26 @@
     <script src="theme/chrome/js/config.js"></script>
 </head>
 <style>
-    .demo-table-expand {
-        font-size: 0;
-    }
-    .demo-table-expand label {
-        width: 90px;
-        color: #99a9bf;
-    }
-    .demo-table-expand .el-form-item {
-        margin-right: 0;
-        margin-bottom: 0;
-        width: 50%;
+    /*.demo-table-expand {*/
+    /*    font-size: 0;*/
+    /*}*/
+    /*.demo-table-expand label {*/
+    /*    width: 90px;*/
+    /*    color: #99a9bf;*/
+    /*}*/
+    /*.demo-table-expand .el-form-item {*/
+    /*    margin-right: 0;*/
+    /*    margin-bottom: 0;*/
+    /*    width: 50%;*/
+    /*}*/
+
+    body{
+        min-height: 300px;
+        overflow-y: auto;
     }
 
     #app{
-        display: flex;
+        /*display: flex;*/
         justify-content: center;
         align-content: center;
     }
@@ -37,70 +42,111 @@
 <body>
 <div id="app">
     <template>
+        <el-dialog @close='closeDialog' :fullscreen="true"  :visible.sync="dialogTableVisible">
+            <el-table  :data="gridData.filter(data => !value || data.text.toLowerCase().includes(value.toLowerCase()))" height="350">
+                <el-table-column sortable :show-overflow-tooltip="true" property="text" label="内容"></el-table-column>
+                <el-table-column sortable :show-overflow-tooltip="true" property="comment" label="批注"></el-table-column>
+                <el-table-column
+                        label="操作"
+                        align="right"
+                        width="150"
+                >
+                    <template slot="header" slot-scope="scope">
+                        <el-input
+                                v-model="value"
+                                size="mini"
+                                placeholder="内容搜索"/>
+                    </template>
+                    <template slot-scope="scope">
+<!--                        <el-button @click="openUrl(scope.row.href)" type="text" size="small">查看</el-button>-->
+<!--                        <el-button  @click="getDetail(scope.row.hs)" type="text" size="small">详情</el-button>-->
+                        <el-button type="text" @click="delDetail(scope.$index,scope.row)" size="small">删除</el-button>
+                    </template>
+                </el-table-column>
+
+            </el-table>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="dialogTableVisible = false">关闭</el-button>
+            </div>
+        </el-dialog>
+
         <el-table
-                :data="tableData"
-                border
-                size="medium"
-                style=" width: 60%;
-        height: 100%;
-        margin: 2% auto;"
-        >
-            <el-table-column type="expand">
-                <template slot-scope="props">
-                    <el-form label-position="left" inline class="demo-table-expand" >
-                        <el-form-item label="高亮数">
-                            <span>{{ props.row.nums }}</span>
-                        </el-form-item>
-                        <el-form-item label="批注数">
-                            <span>{{ props.row.commentNums }}</span>
-                        </el-form-item>
-                        <el-form-item label="名称">
-                            <span>{{ props.row.title }}</span>
-                        </el-form-item>
-                        <el-form-item label="详情页">
-                            <el-link @click="openUrl(props.row.href)">{{ props.row.href }}</el-link>
-<!--                            <span>{{ props.row.detail }}</span>-->
-                        </el-form-item>
-<!--                        <el-form-item label="观看地址">-->
-<!--                            <span>{{ props.row.href }}</span>-->
-<!--                        </el-form-item>-->
-                    </el-form>
-                </template>
-            </el-table-column>
+                ref="filterTable"
+                :data="tableData.filter(function (data){
+                 return !search || (data.title.toLowerCase().includes(search.toLowerCase()))
+                }).slice((currentPage-1)*pageSize,currentPage*pageSize)"
+                :default-sort="{prop: 'readDate', order: 'descending'}"
+                style="width: 100%;"
+                height="500"
+                >
             <el-table-column
-                    label="名称"
-                    style="width: 100px"
-                    prop="title">
-            </el-table-column>
-            <el-table-column
-                    label="高亮数"
-                    prop="nums">
-            </el-table-column>
-            <el-table-column
-                    label="封面">
+                    prop="icon"
+                    label="站点"
+            >
                 <template slot-scope="scope">
-                    <el-image style="width: 10px" :src="scope.row.icon" :preview-src-list="[scope.row.icon]">
+                    <el-image style="width: 20px" :src="scope.row.icon">
                         <div slot="error" class="image-slot">
                             <i class="el-icon-picture-outline"></i>
                         </div>
                     </el-image>
                 </template>
-
             </el-table-column>
             <el-table-column
+                    prop="title"
+                    label="标题"
+                    :show-overflow-tooltip="true"
+                    min-width="150"
+                    >
+            </el-table-column>
 
-                    label="操作"
-                    width="100">
+            <el-table-column
+                    prop="nums"
+                    sortable
+                    width="100"
+                    label="高亮数">
+            </el-table-column>
+            <el-table-column
+                    prop="commentNums"
+                    sortable
+                    width="100"
+                    label="批注数">
+            </el-table-column>
+            <el-table-column
+                    prop="readDate"
+                    label="最后阅读时间"
+                    sortable
+                    width="200"
+
+            >
+            </el-table-column>
+            <el-table-column
+                label="操作"
+                align="right"
+                width="150"
+            >
+                <template slot="header" slot-scope="scope">
+                    <el-input
+                            v-model="search"
+                            size="mini"
+                            placeholder="标题搜索"/>
+                </template>
                 <template slot-scope="scope">
                     <el-button @click="openUrl(scope.row.href)" type="text" size="small">查看</el-button>
-                    <el-button type="text" @click="del(scope.row.href)" size="small">删除</el-button>
-                    <!--                    <el-button type="text" size="small">编辑</el-button>-->
+                    <el-button  @click="getDetail(scope.row.hs)" type="text" size="small">详情</el-button>
+                    <el-button type="text" @click="del(scope.row.key)" size="small">删除</el-button>
                 </template>
             </el-table-column>
         </el-table>
-        </el-table>
+        <el-pagination
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+                :current-page="currentPage"
+                :page-sizes="[1,5, 10, 20, 40]"
+        :page-size="pageSize"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="tableData.length">
+        </el-pagination>
     </template>
-
 </div>
 </body>
 </html>

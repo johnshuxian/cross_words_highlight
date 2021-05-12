@@ -34,19 +34,19 @@ chrome.runtime.onMessage.addListener(
 /**
  * 缓存变更监听
  */
-chrome.storage.onChanged.addListener(function (changes, namespace) {
-    for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
-        if(namespace === 'sync'){
-            chrome.storage.sync.get([key],function (res){
-                console.log(res)
-            })
-        }
-        console.log(
-            `Storage key "${key}" in namespace "${namespace}" changed.`,
-            `Old value was "${oldValue}", new value is "${newValue}".`
-        );
-    }
-});
+// chrome.storage.onChanged.addListener(function (changes, namespace) {
+//     for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
+//         if(namespace === 'sync'){
+//             chrome.storage.sync.get([key],function (res){
+//                 console.log(res)
+//             })
+//         }
+//         console.log(
+//             `Storage key "${key}" in namespace "${namespace}" changed.`,
+//             `Old value was "${oldValue}", new value is "${newValue}".`
+//         );
+//     }
+// });
 
 const store = class LocalStore {
     constructor(id) {

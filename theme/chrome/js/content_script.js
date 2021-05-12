@@ -119,6 +119,7 @@ function copyToClipboard(t) {
     input.select();
     if (document.execCommand('copy')) {
         document.execCommand('copy');
+        layer.msg('复制成功')
         // console.log('复制成功',t);
     }
     document.body.removeChild(input);
@@ -141,7 +142,30 @@ function createHtml(left, top, id) {
 function goto(id) {
     let position = getPosition(highlighter.getDoms(id)[0])
     // console.log(position)
-    window.scrollTo(position.left, position.top - window.screen.availHeight / 2);
+    const currentY = document.documentElement.scrollTop || document.body.scrollTop
+
+    scrollAnimation(position.left,currentY,position.top - window.screen.availHeight / 2)
+    // window.scrollTo(position.left, position.top - window.screen.availHeight / 2);
+}
+
+function scrollAnimation(targetX,currentY, targetY) {
+    // 获取当前位置方法
+
+    // 计算需要移动的距离
+    let needScrollTop = targetY - currentY
+    let _currentY = currentY
+    setTimeout(() => {
+        // 一次调用滑动帧数，每次调用会不一样
+        const dist = Math.ceil(needScrollTop / 10)
+        _currentY += dist
+        window.scrollTo(_currentY, currentY)
+        // 如果移动幅度小于十个像素，直接移动，否则递归调用，实现动画效果
+        if (needScrollTop > 10 || needScrollTop < -10) {
+            scrollAnimation(targetX,_currentY, targetY)
+        } else {
+            window.scrollTo(targetX, targetY)
+        }
+    }, 1)
 }
 
 function mySort(a, b) {
@@ -170,10 +194,10 @@ highlighter
         // event.preventDefault()
         const position = getPosition(highlighter.getDoms(id)[0]);
         createHtml(position.left - 20, position.top - 20, id)
-        log('click -', id);
+        // log('click -', id);
     })
     .on(Highlighter.event.HOVER, ({id}) => {
-        log('hover -', id);
+        // log('hover -', id);
         highlighter.addClass('highlight-wrap-hover', id);
 
         let text = localStorage.getItem(id)
@@ -186,7 +210,7 @@ highlighter
         }
     })
     .on(Highlighter.event.HOVER_OUT, ({id}) => {
-        log('hover out -', id);
+        // log('hover out -', id);
         highlighter.removeClass('highlight-wrap-hover', id);
 
         if (layer_index) {
@@ -195,7 +219,7 @@ highlighter
         }
     })
     .on(Highlighter.event.CREATE, ({sources}) => {
-        log('create -', sources);
+        // log('create -', sources);
 
         contactBackJs('add', sources)
 
@@ -234,7 +258,7 @@ highlighter
         store.save(sources);
     })
     .on(Highlighter.event.REMOVE, ({ids}) => {
-        log('remove -', ids);
+        // log('remove -', ids);
         ids.forEach(id => store.remove(id));
     });
 
@@ -296,11 +320,35 @@ function contactBackJs(action = 'add', sources) {
                 sources = [sources.hs];
             }
 
+            let favicon = $("link[rel='shortcut icon']")
+
+            let icon
+
+            if(favicon.length){
+                icon = favicon.attr('href')
+            }else{
+                icon = '/favicon.ico'
+            }
+
+            if(!/https?:/.test(icon)){
+                if(/^\/\w+/.test(icon)){
+                    icon = location.protocol + '//' + info.host+icon
+                }else if(/^\w+/.test(icon)){
+                    icon = location.protocol + '//' + info.host+'/'+icon
+                }else if(/^\/\/\w+/.test(icon)){
+                    icon = location.protocol+icon
+                }else{
+                    icon = ''
+                }
+            }
+
+
             sources.forEach(function (store, idx) {
                 store.comment = localStorage.getItem(store.id) || ''
                 store.href = info.href
                 store.title = info.title
-                store.icon = location.protocol + '//' + info.host + '/favicon.ico'
+                store.icon  = icon
+                store.readDate = new Date().toLocaleString()
                 sources[idx] = store
             })
 
@@ -352,7 +400,7 @@ document.addEventListener('click', e => {
         const id = $($ele).parents("#johns-editor").attr("data-id")
 
         localStorage.removeItem(id)
-        log('*click remove-tip*', id);
+        // log('*click remove-tip*', id);
         highlighter.removeClass('highlight-wrap-hover', id);
         highlighter.remove(id);
         $("a#" + id).parent().remove()
