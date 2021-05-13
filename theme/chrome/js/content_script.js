@@ -320,7 +320,7 @@ function contactBackJs(action = 'add', sources) {
                 sources = [sources.hs];
             }
 
-            let favicon = $("link[rel='shortcut icon']")
+            let favicon = $("link[rel*='icon']")
 
             let icon
 

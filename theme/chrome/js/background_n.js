@@ -143,3 +143,14 @@ function getStorageSyncData(key) {
         });
     });
 }
+
+// const options = {
+//     type: 'checkbox',
+//     id: 'stopUse',
+//     title: '暂时停用',
+//     checked: false,
+//     onclick: function (info,tab){
+//         // chrome.tabs.create({url:'config.html'});
+//     },
+// }
+// chrome.contextMenus.create(options);
