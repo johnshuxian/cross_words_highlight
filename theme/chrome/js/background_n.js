@@ -27,6 +27,8 @@ chrome.runtime.onMessage.addListener(
             }
 
 
+            // chrome.runtime.sendMessage({from: "bg_js", action: request.action,data:request.data}, function (response) {});
+
         }
     }
 );

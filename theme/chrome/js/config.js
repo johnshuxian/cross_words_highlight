@@ -132,6 +132,24 @@ async function getData(){
     return { tableData: Object.values(res)}
 }
 
+function init(that){
+    getData().then(function (v){
+        v.tableData.sort(function (a,b){
+            if (a['readDate'] !== b['readDate']) {
+                return a['readDate'] > b['readDate'] ? -1 : 1;
+            }
+
+            return -1;
+        })
+
+        that.tableDataLength = v.tableData.length
+        that.tableData = v.tableData
+        that.tableDataOri = v.tableData
+        that.tableDataTem = v.tableData
+        that.loading = false
+    })
+}
+
 $(function(){
     $(document).attr("title", chrome.runtime.getManifest().name+" - Configurations");
 
@@ -139,9 +157,13 @@ $(function(){
         created() {
             let that = this
 
-             getData().then(function (v){
-                 that.tableData = v.tableData
-             })
+             init(that)
+        },
+        watch: {
+            //watch监视input输入值的变化,只要是watch变化了 search()就会被调用
+            search(newVal) {
+                this.handleSearch(newVal);
+            },
         },
         methods: {
             tableRowClassName({row, rowIndex}) {
@@ -152,13 +174,70 @@ $(function(){
                 }
                 return '';
             },
+            changeSort(orderInfo){
+                let column = orderInfo.prop
+                let order  = orderInfo.order
+
+                this.currentPage = 1
+
+                this.tableData = this.tableDataOri.sort(function (a,b){
+                    if(order === 'ascending'){
+                        if (a[column] !== b[column]) {
+                            return a[column] < b[column] ? -1 : 1;
+                        }
+                    }else{
+                        if (a[column] !== b[column]) {
+                            return a[column] > b[column] ? -1 : 1;
+                        }
+                    }
+
+                    return -1;
+                });
+
+                this.handleTableData(this.tableData)
+            },
             openUrl(url){
                 window.open(url)
+            },
+            handleSearch(val) {
+                let search = val;
+
+                if (search === "") {
+                    this.currentPage = 1
+                    this.tableDataOri = this.tableDataTem
+                    this.tableDataLength = this.tableDataOri.length
+                    this.handleTableData()
+                }
+
+                if (search !== "") {
+                    //如果search等于空
+
+                    this.tableDataOri = this.tableDataOri.filter(
+                        (data) =>
+                            !search || data.title.toLowerCase().includes(search.toLowerCase())
+                    );
+
+                    this.tableDataLength = this.tableDataOri.length
+
+                    this.currentPage = 1
+
+                    this.handleTableData()
+                }
             },
             delDetail(index,hs){
                 let stores = new store(hs.href)
 
+                if(hs.comment){
+                    this.tableData[this.index].commentNums--
+                }
+
+                this.tableData[this.index].nums--
+
                 stores.remove(hs.id)
+
+                if(this.tableData[this.index].nums === 0){
+                    this.tableData.splice(this.index,1)
+                }
 
                 this.gridData.splice(index,1)
             },
@@ -166,19 +245,41 @@ $(function(){
                 let that = this
                 chrome.storage.sync.remove(key,function (){
                     getData().then(function (v){
-                        that.currentPage = 1
+                        // that.currentPage = 1
+                        that.tableDataLength = v.tableData.length
                         that.tableData = v.tableData
+                        that.tableDataOri = v.tableData
                     })
                 })
             },
             handleSizeChange: function (size) {
                 this.pageSize = size;
+                this.handleTableData();
             },
             handleCurrentChange: function(currentPage){
                 this.currentPage = currentPage;
+                this.handleTableData()
+            },
+            handlePrevClick(val) {
+                //点击向前的按钮 执行的方法
+                this.currentPage = val;
+                this.handleTableData();
+            },
+            handleNextClick(val) {
+                this.currentPage = val;
+                //再调用handleTableData 方法
+                this.handleTableData();
             },
             handleDetailSizeChange: function (size) {
                 this.detailPageSize = size;
+            },
+            handleTableData() {
+                this.tableDataLength = this.tableDataOri.length;
+                // console.log(this.currentPage,this.pageSize)
+                this.tableData = this.tableDataOri.slice(
+                    (this.currentPage - 1) * this.pageSize,
+                    this.pageSize*this.currentPage
+                );
             },
             handleDetailCurrentChange: function(currentPage){
                 this.detailPage = currentPage;
@@ -186,22 +287,46 @@ $(function(){
             filterTag(value, row) {
                 return row.icon === value;
             },
-            getDetail(detail){
-                this.dialogTableVisible = true;this.gridData = detail;
+            getDetail(detail,index){
+                this.index = index
+                this.dialogTableVisible = true;
+                this.gridData = detail;
             },
             closeDialog(){
-                location.reload();
+                // location.reload();
+            },
+            open(text) {
+                this.$confirm('复制文字', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'info'
+                }).then(() => {
+                    copyToClipboard(text)
+                    this.$message({
+                        type: 'success',
+                        message: '复制成功!'
+                    });
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '取消复制'
+                    });
+                });
             }
         },
         data() {
             return {
                 tableData: [],
+                tableDataOri: [],
+                tableDataTem: [],
                 gridData:[],
                 dialogTableVisible:false,
                 search: '',
                 value:'',
+                tableDataLength:0,
                 currentPage:1, //初始页
                 pageSize:5,    //每页的数据
+                loading: true
             }
         }
     }
@@ -209,3 +334,30 @@ $(function(){
     var Ctor = Vue.extend(Main)
     new Ctor().$mount('#app')
 });
+
+chrome.runtime.onMessage.addListener(
+    function(request, sender, sendResponse) {
+        console.log(request)
+        if(request.from === 'content_js'){
+            switch (request.action) {
+                case 'add':
+                    location.reload()
+                    break;
+                case 'remove':
+                    location.reload()
+                    break;
+            }
+        }
+    })
+
+
+function copyToClipboard(t) {
+    const input = document.createElement('input');
+    document.body.appendChild(input);
+    input.setAttribute('value', t);
+    input.select();
+    if (document.execCommand('copy')) {
+        document.execCommand('copy');
+    }
+    document.body.removeChild(input);
+}

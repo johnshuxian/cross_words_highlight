@@ -44,8 +44,16 @@
     <template>
         <el-dialog @close='closeDialog' :fullscreen="true"  :visible.sync="dialogTableVisible">
             <el-table  :data="gridData.filter(data => !value || data.text.toLowerCase().includes(value.toLowerCase()))" height="350">
-                <el-table-column sortable :show-overflow-tooltip="true" property="text" label="内容"></el-table-column>
-                <el-table-column sortable :show-overflow-tooltip="true" property="comment" label="批注"></el-table-column>
+                <el-table-column sortable :show-overflow-tooltip="true" property="text" label="内容">
+                    <template slot-scope="scope">
+                        <el-button type="text" :show-overflow-tooltip="true" @click="open(scope.row.text)">{{ scope.row.text }}</el-button>
+                    </template>
+                </el-table-column>
+                <el-table-column sortable :show-overflow-tooltip="true" @click="open" property="comment" label="批注">
+                    <template slot-scope="scope">
+                        <el-button type="text" :show-overflow-tooltip="true" @click="open(scope.row.comment)">{{ scope.row.comment }}</el-button>
+                    </template>
+                </el-table-column>
                 <el-table-column
                         label="操作"
                         align="right"
@@ -72,11 +80,11 @@
 
         <el-table
                 ref="filterTable"
-                :data="tableData.filter(function (data){
-                 return !search || (data.title.toLowerCase().includes(search.toLowerCase()))
-                }).slice((currentPage-1)*pageSize,currentPage*pageSize)"
-                :default-sort="{prop: 'readDate', order: 'descending'}"
+                :data="tableData"
                 style="width: 100%;"
+                :default-sort="{prop: 'readDate', order: 'descending'}"
+                @sort-change="changeSort"
+                v-loading="loading"
                 height="500"
                 >
             <el-table-column
@@ -101,20 +109,20 @@
 
             <el-table-column
                     prop="nums"
-                    sortable
+                    sortable="custom"
                     width="100"
                     label="高亮数">
             </el-table-column>
             <el-table-column
                     prop="commentNums"
-                    sortable
+                    sortable="custom"
                     width="100"
                     label="批注数">
             </el-table-column>
             <el-table-column
                     prop="readDate"
                     label="最后阅读时间"
-                    sortable
+                    sortable="custom"
                     width="200"
 
             >
@@ -126,25 +134,28 @@
             >
                 <template slot="header" slot-scope="scope">
                     <el-input
+                            scope
                             v-model="search"
                             size="mini"
                             placeholder="标题搜索"/>
                 </template>
                 <template slot-scope="scope">
                     <el-button @click="openUrl(scope.row.href)" type="text" size="small">查看</el-button>
-                    <el-button  @click="getDetail(scope.row.hs)" type="text" size="small">详情</el-button>
+                    <el-button  @click="getDetail(scope.row.hs,scope.$index)" type="text" size="small">详情</el-button>
                     <el-button type="text" @click="del(scope.row.key)" size="small">删除</el-button>
                 </template>
             </el-table-column>
         </el-table>
         <el-pagination
+                @next-click="handleNextClick"
+                @prev-click="handlePrevClick"
                 @size-change="handleSizeChange"
                 @current-change="handleCurrentChange"
                 :current-page="currentPage"
                 :page-sizes="[1,5, 10, 20, 40]"
         :page-size="pageSize"
         layout="total, sizes, prev, pager, next, jumper"
-        :total="tableData.length">
+        :total="tableDataLength">
         </el-pagination>
     </template>
 </div>
