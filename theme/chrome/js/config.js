@@ -31,7 +31,7 @@ const store = class LocalStore {
 
     jsonToStore(stores) {
         if(stores.length === 0){
-            chrome.storage.sync.remove([this.key])
+            chrome.storage.sync.remove([this.key],function (){})
         }else{
             chrome.storage.sync.set({[this.key]:stores}, function(res) {})
         }
@@ -133,6 +133,13 @@ async function getData(){
 }
 
 function init(that){
+    if(!that){
+        return
+    }
+
+    that.loading = true
+
+    //初始化
     getData().then(function (v){
         v.tableData.sort(function (a,b){
             if (a['readDate'] !== b['readDate']) {
@@ -143,9 +150,9 @@ function init(that){
         })
 
         that.tableDataLength = v.tableData.length
-        that.tableData = v.tableData
         that.tableDataOri = v.tableData
-        that.tableDataTem = v.tableData
+        that.handleTableData()
+
         that.loading = false
     })
 }
@@ -156,7 +163,6 @@ $(function(){
     var Main = {
         created() {
             let that = this
-
              init(that)
         },
         watch: {
@@ -175,81 +181,37 @@ $(function(){
                 return '';
             },
             changeSort(orderInfo){
-                let column = orderInfo.prop
-                let order  = orderInfo.order
+                this.column = orderInfo.prop
+                this.order  = orderInfo.order
 
                 this.currentPage = 1
 
-                this.tableData = this.tableDataOri.sort(function (a,b){
-                    if(order === 'ascending'){
-                        if (a[column] !== b[column]) {
-                            return a[column] < b[column] ? -1 : 1;
-                        }
-                    }else{
-                        if (a[column] !== b[column]) {
-                            return a[column] > b[column] ? -1 : 1;
-                        }
-                    }
-
-                    return -1;
-                });
-
-                this.handleTableData(this.tableData)
+                this.handleTableData()
             },
             openUrl(url){
                 window.open(url)
             },
             handleSearch(val) {
-                let search = val;
+                // let search = val;
+                this.search = val
 
-                if (search === "") {
-                    this.currentPage = 1
-                    this.tableDataOri = this.tableDataTem
-                    this.tableDataLength = this.tableDataOri.length
-                    this.handleTableData()
-                }
+                this.currentPage = 1
 
-                if (search !== "") {
-                    //如果search等于空
-
-                    this.tableDataOri = this.tableDataOri.filter(
-                        (data) =>
-                            !search || data.title.toLowerCase().includes(search.toLowerCase())
-                    );
-
-                    this.tableDataLength = this.tableDataOri.length
-
-                    this.currentPage = 1
-
-                    this.handleTableData()
-                }
+                this.handleTableData()
             },
             delDetail(index,hs){
                 let stores = new store(hs.href)
-
-                if(hs.comment){
-                    this.tableData[this.index].commentNums--
-                }
-
-                this.tableData[this.index].nums--
-
                 stores.remove(hs.id)
-
-                if(this.tableData[this.index].nums === 0){
-                    this.tableData.splice(this.index,1)
-                }
-
                 this.gridData.splice(index,1)
             },
             del(key){
                 let that = this
                 chrome.storage.sync.remove(key,function (){
-                    getData().then(function (v){
-                        // that.currentPage = 1
-                        that.tableDataLength = v.tableData.length
-                        that.tableData = v.tableData
-                        that.tableDataOri = v.tableData
-                    })
+                    const totalPage = Math.ceil((that.tableDataLength - 1) / that.pageSize) // 总页数
+                    const currentPage = that.currentPage > totalPage ? totalPage : that.currentPage
+                    that.currentPage = that.currentPage < 1 ? 1 : currentPage
+
+                    init(that)
                 })
             },
             handleSizeChange: function (size) {
@@ -274,9 +236,40 @@ $(function(){
                 this.detailPageSize = size;
             },
             handleTableData() {
-                this.tableDataLength = this.tableDataOri.length;
-                // console.log(this.currentPage,this.pageSize)
-                this.tableData = this.tableDataOri.slice(
+                let temp
+
+                if(this.search){
+                    temp = this.tableDataOri.filter(
+                        (data) =>
+                            !this.search || data.title.toLowerCase().includes(this.search.toLowerCase())
+                    );
+                }else{
+                   temp = this.tableDataOri
+                }
+
+                if(this.column && this.order){
+                    temp = temp.sort(function (a,b){
+                        if(this.order === 'ascending'){
+                            if (a[this.column] !== b[this.column]) {
+                                return a[this.column] < b[this.column] ? -1 : 1;
+                            }
+                        }else{
+                            if (a[this.column] !== b[this.column]) {
+                                return a[this.column] > b[this.column] ? -1 : 1;
+                            }
+                        }
+
+                        return -1;
+                    });
+                }
+
+                this.tableDataLength = temp.length;
+
+                if(!temp[(this.currentPage - 1) * this.pageSize]){
+                    this.currentPage--
+                }
+
+                this.tableData = temp.slice(
                     (this.currentPage - 1) * this.pageSize,
                     this.pageSize*this.currentPage
                 );
@@ -293,7 +286,10 @@ $(function(){
                 this.gridData = detail;
             },
             closeDialog(){
-                // location.reload();
+                init(this)
+            },
+            errorHandler(){
+              return false;
             },
             open(text) {
                 this.$confirm('复制文字', '提示', {
@@ -318,7 +314,6 @@ $(function(){
             return {
                 tableData: [],
                 tableDataOri: [],
-                tableDataTem: [],
                 gridData:[],
                 dialogTableVisible:false,
                 search: '',
@@ -331,7 +326,7 @@ $(function(){
         }
     }
 
-    var Ctor = Vue.extend(Main)
+    let Ctor = Vue.extend(Main)
     new Ctor().$mount('#app')
 });
 
