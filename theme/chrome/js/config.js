@@ -106,7 +106,8 @@ async function getData(){
                     if(v.hs.comment){
                         commentNums++
                     }
-                    info_i.hs.push({text:v.hs.text,comment:v.hs.comment,key:key,id:v.hs.id,href:v.hs.href})
+
+                    info_i.hs.push({text:v.hs.text,comment:v.hs.comment,key:key,id:v.hs.id,href:v.hs.href,position:v.hs.position})
 
                     info_i.href = v.hs.href
                     info_i.title = v.hs.title
@@ -165,6 +166,15 @@ $(function(){
             let that = this
              init(that)
         },
+        filters: {
+            ellipsis (value) {
+                if (!value) return ''
+                if (value.length > 15) {
+                    return value.slice(0,15) + '...'
+                }
+                    return value
+                }
+            },
         watch: {
             //watch监视input输入值的变化,只要是watch变化了 search()就会被调用
             search(newVal) {
@@ -173,11 +183,10 @@ $(function(){
         },
         methods: {
             tableRowClassName({row, rowIndex}) {
-                if (rowIndex === 1) {
+                if(rowIndex % 2 === 1){
                     return 'warning-row';
-                } else if (rowIndex === 3) {
-                    return 'success-row';
                 }
+
                 return '';
             },
             changeSort(orderInfo){
@@ -192,7 +201,6 @@ $(function(){
                 window.open(url)
             },
             handleSearch(val) {
-                // let search = val;
                 this.search = val
 
                 this.currentPage = 1
@@ -247,19 +255,15 @@ $(function(){
                    temp = this.tableDataOri
                 }
 
+                let that = this
+
                 if(this.column && this.order){
                     temp = temp.sort(function (a,b){
-                        if(this.order === 'ascending'){
-                            if (a[this.column] !== b[this.column]) {
-                                return a[this.column] < b[this.column] ? -1 : 1;
-                            }
+                        if(that.order === 'ascending'){
+                            return a[that.column] < b[that.column] ? -1 : 1;
                         }else{
-                            if (a[this.column] !== b[this.column]) {
-                                return a[this.column] > b[this.column] ? -1 : 1;
-                            }
+                            return a[that.column] > b[that.column] ? -1 : 1;
                         }
-
-                        return -1;
                     });
                 }
 
@@ -280,9 +284,20 @@ $(function(){
             filterTag(value, row) {
                 return row.icon === value;
             },
-            getDetail(detail,index){
-                this.index = index
+            getDetail(detail){
                 this.dialogTableVisible = true;
+
+                detail.sort(function (a, b) {
+                    if (a.position.top !== b.position.top) {
+                        return a.position.top < b.position.top ? -1 : 1;
+                    }
+
+                    if (a.position.left !== b.position.left) {
+                        return a.position.left < b.position.left ? -1 : 1;
+                    }
+
+                })
+
                 this.gridData = detail;
             },
             closeDialog(){
@@ -316,6 +331,8 @@ $(function(){
                 tableDataOri: [],
                 gridData:[],
                 dialogTableVisible:false,
+                order:'',
+                column:'',
                 search: '',
                 value:'',
                 tableDataLength:0,

@@ -28,30 +28,62 @@
     /*    width: 50%;*/
     /*}*/
 
-    body{
+    body {
         min-height: 300px;
         overflow-y: auto;
     }
 
-    #app{
+    #app {
         /*display: flex;*/
         justify-content: center;
         align-content: center;
     }
+
+    .el-table .warning-row {
+        background: oldlace;
+    }
+
+    .el-table .success-row {
+        background: #f0f9eb;
+    }
+
 </style>
 <body>
 <div id="app">
     <template>
-        <el-dialog @close='closeDialog' :fullscreen="true"  :visible.sync="dialogTableVisible">
-            <el-table  :data="gridData.filter(data => !value || data.text.toLowerCase().includes(value.toLowerCase()))" height="350">
-                <el-table-column sortable :show-overflow-tooltip="true" property="text" label="内容">
+        <el-dialog @close='closeDialog' :fullscreen="true" :visible.sync="dialogTableVisible">
+            <el-table border
+                      :data="gridData.filter(data => !value || data.text.toLowerCase().includes(value.toLowerCase()))"
+                      height="350">
+                <el-table-column :show-overflow-tooltip="true" property="text" label="内容">
                     <template slot-scope="scope">
-                        <el-button type="text" :show-overflow-tooltip="true" @click="open(scope.row.text)">{{ scope.row.text }}</el-button>
+                        <!-- 新增鼠标移动到名称位置显示全部 -->
+                        <!--                        <el-popover-->
+                        <!--                                placement="top-start"-->
+                        <!--                                width="400"-->
+                        <!--                                trigger="hover">-->
+                        <!--                            <slot>{{scope.row.text}}</slot>-->
+                        <!--                            &lt;!&ndash; 内容和过滤&ndash;&gt;-->
+                        <!--                            <el-button slot="reference" @click="open(scope.row.text)" type="text">{{scope.row.text|ellipsis}}</el-button>-->
+                        <!--                        </el-popover>-->
+                        <el-button type="text" :show-overflow-tooltip="true" @click="open(scope.row.text)">
+                            {{ scope.row.text}}
+                        </el-button>
                     </template>
                 </el-table-column>
-                <el-table-column sortable :show-overflow-tooltip="true" @click="open" property="comment" label="批注">
+                <el-table-column :show-overflow-tooltip="true" @click="open" property="comment" label="批注">
                     <template slot-scope="scope">
-                        <el-button type="text" :show-overflow-tooltip="true" @click="open(scope.row.comment)">{{ scope.row.comment }}</el-button>
+                        <!--                        <el-popover-->
+                        <!--                                placement="top-start"-->
+                        <!--                                width="200"-->
+                        <!--                                trigger="hover">-->
+                        <!--                            <slot>{{scope.row.comment}}</slot>-->
+                        <!--                            &lt;!&ndash; 内容和过滤&ndash;&gt;-->
+                        <!--                            <el-button slot="reference" @click="open(scope.row.comment)" type="text">{{scope.row.comment|ellipsis}}</el-button>-->
+                        <!--                        </el-popover>-->
+                        <el-button type="text" :show-overflow-tooltip="true" @click="open(scope.row.comment)">
+                            {{ scope.row.comment }}
+                        </el-button>
                     </template>
                 </el-table-column>
                 <el-table-column
@@ -66,8 +98,8 @@
                                 placeholder="内容搜索"/>
                     </template>
                     <template slot-scope="scope">
-<!--                        <el-button @click="openUrl(scope.row.href)" type="text" size="small">查看</el-button>-->
-<!--                        <el-button  @click="getDetail(scope.row.hs)" type="text" size="small">详情</el-button>-->
+                        <!--                        <el-button @click="openUrl(scope.row.href)" type="text" size="small">查看</el-button>-->
+                        <!--                        <el-button  @click="getDetail(scope.row.hs)" type="text" size="small">详情</el-button>-->
                         <el-button type="text" @click="delDetail(scope.$index,scope.row)" size="small">删除</el-button>
                     </template>
                 </el-table-column>
@@ -85,19 +117,23 @@
                 :default-sort="{prop: 'readDate', order: 'descending'}"
                 @sort-change="changeSort"
                 v-loading="loading"
+                :row-class-name="tableRowClassName"
                 height="500"
-                >
+        >
             <el-table-column
                     prop="icon"
                     label="站点"
             >
                 <template slot-scope="scope">
-<!--                    <el-image style="width: 20px" :src="scope.row.icon">-->
-<!--                        <div slot="error" class="image-slot">-->
-<!--                            <i class="el-icon-picture-outline"></i>-->
-<!--                        </div>-->
-<!--                    </el-image>-->
-                    <el-avatar size="large" :title="scope.row.href" @error="errorHandler" :key="scope.row.key" shape="circle" fit="scale-down" :src="scope.row.icon">{{ scope.row.href.replace(/https?:\/\//,'') }}</el-avatar>
+                    <!--                    <el-image style="width: 20px" :src="scope.row.icon">-->
+                    <!--                        <div slot="error" class="image-slot">-->
+                    <!--                            <i class="el-icon-picture-outline"></i>-->
+                    <!--                        </div>-->
+                    <!--                    </el-image>-->
+                    <el-avatar size="large" :title="scope.row.href" @error="errorHandler" :key="scope.row.key"
+                               shape="circle" fit="scale-down" :src="scope.row.icon">
+                        {{ scope.row.href.replace(/https?:\/\//, '') }}
+                    </el-avatar>
                 </template>
             </el-table-column>
             <el-table-column
@@ -105,7 +141,7 @@
                     label="标题"
                     :show-overflow-tooltip="true"
                     min-width="150"
-                    >
+            >
             </el-table-column>
 
             <el-table-column
@@ -129,9 +165,9 @@
             >
             </el-table-column>
             <el-table-column
-                label="操作"
-                align="right"
-                width="150"
+                    label="操作"
+                    align="right"
+                    width="150"
             >
                 <template slot="header" slot-scope="scope">
                     <el-input
@@ -142,8 +178,8 @@
                 </template>
                 <template slot-scope="scope">
                     <el-button @click="openUrl(scope.row.href)" type="text" size="small">查看</el-button>
-                    <el-button  @click="getDetail(scope.row.hs,scope.$index)" type="text" size="small">详情</el-button>
-                    <el-button type="text" @click="del(scope.row.key,scope.$index)" size="small">删除</el-button>
+                    <el-button @click="getDetail(scope.row.hs)" type="text" size="small">详情</el-button>
+                    <el-button type="text" @click="del(scope.row.key)" size="small">删除</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -154,9 +190,9 @@
                 @current-change="handleCurrentChange"
                 :current-page="currentPage"
                 :page-sizes="[5, 10, 20, 40]"
-        :page-size="pageSize"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="tableDataLength">
+                :page-size="pageSize"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="tableDataLength">
         </el-pagination>
     </template>
 </div>

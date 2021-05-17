@@ -273,10 +273,8 @@ function restore() {
 
     chrome.storage.sync.get([bg_key], function (res) {
         if (res[bg_key]) {
-            res[bg_key].forEach(
-                ({hs}) => highlighter.fromStore(hs.startMeta, hs.endMeta, hs.text, hs.id, hs.extra)
-            );
-            res[bg_key].forEach(function (hs) {
+            res[bg_key].forEach(function ({hs}) {
+                highlighter.fromStore(hs.startMeta, hs.endMeta, hs.text, hs.id, hs.extra)
                 if (hs.comment) {
                     localStorage.setItem(hs.id, hs.comment)
                 }
@@ -303,13 +301,6 @@ Date.prototype.Format = function (fmt) {
         if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length === 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
     return fmt;
 }
-
-
-// const storeInfos =  store.getAll();
-//
-// storeInfos.forEach(
-//     ({hs}) => highlighter.fromStore(hs.startMeta, hs.endMeta, hs.text, hs.id, hs.extra)
-// );
 
 /**
  * avoid re-highlighting the existing selection
@@ -361,11 +352,13 @@ function contactBackJs(action = 'add', sources) {
 
 
             sources.forEach(function (store, idx) {
+                let position = getPosition(highlighter.getDoms(store.id)[0]);
                 store.comment = localStorage.getItem(store.id) || ''
                 store.href = info.href
                 store.title = info.title
                 store.icon  = icon
                 store.readDate = new Date().Format("yyyy-MM-dd hh:mm:ss")
+                store.position = position
                 sources[idx] = store
             })
 
@@ -408,6 +401,16 @@ highlighter.hooks.Render.SelectedNodes.tap((id, selectedNodes) => {
     return selectedNodes;
 });
 
+function remove(id){
+    localStorage.removeItem(id)
+    // log('*click remove-tip*', id);
+    highlighter.removeClass('highlight-wrap-hover', id);
+    highlighter.remove(id);
+    $("a#" + id).parent().remove()
+    $("#johns-editor").remove();
+    contactBackJs('remove', id)
+}
+
 document.addEventListener('click', e => {
     const $ele = e.target;
 
@@ -416,13 +419,7 @@ document.addEventListener('click', e => {
 
         const id = $($ele).parents("#johns-editor").attr("data-id")
 
-        localStorage.removeItem(id)
-        // log('*click remove-tip*', id);
-        highlighter.removeClass('highlight-wrap-hover', id);
-        highlighter.remove(id);
-        $("a#" + id).parent().remove()
-        $("#johns-editor").remove();
-        contactBackJs('remove', id)
+        remove(id)
     } else if ($ele.classList.contains('js-copy')) {
         const id = $($ele).parents("#johns-editor").attr("data-id")
         let text = ''
