@@ -144,13 +144,26 @@ function getStorageSyncData(key) {
     });
 }
 
-// const options = {
-//     type: 'checkbox',
-//     id: 'stopUse',
-//     title: '暂时停用',
-//     checked: false,
-//     onclick: function (info,tab){
-//         // chrome.tabs.create({url:'config.html'});
-//     },
-// }
-// chrome.contextMenus.create(options);
+const options = {
+    type: 'checkbox',
+    id: 'stopUse',
+    title: '扩展停用',
+    checked: false,
+    onclick: function (info,tab){
+        chrome.storage.sync.set({setting:{use:!info.checked}},function (){
+            chrome.tabs.executeScript(tab.id,{
+                code:"location.reload()"
+            })
+        })
+    },
+}
+chrome.contextMenus.create(options);
+
+chrome.storage.sync.get(['setting'],function (item){
+    if(!item.setting){
+        chrome.storage.sync.set({setting:{use:true}},function (){})
+        chrome.contextMenus.update('stopUse',{checked: false})
+    }else{
+        chrome.contextMenus.update('stopUse',{checked: !item.setting.use})
+    }
+})

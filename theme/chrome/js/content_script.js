@@ -180,88 +180,6 @@ function mySort(a, b) {
     return -1;
 }
 
-buildAnchor()
-
-const highlighter = new Highlighter({
-    wrapTag: 'i',
-    exceptSelectors: ['.my-remove-tip', 'pre', 'code']
-});
-
-let layer_index = null
-
-highlighter
-    .on(Highlighter.event.CLICK, ({id}) => {
-        // event.preventDefault()
-        const position = getPosition(highlighter.getDoms(id)[0]);
-        createHtml(position.left - 20, position.top - 20, id)
-        // log('click -', id);
-    })
-    .on(Highlighter.event.HOVER, ({id}) => {
-        // log('hover -', id);
-        highlighter.addClass('highlight-wrap-hover', id);
-
-        let text = localStorage.getItem(id)
-
-        if (text) {
-            layer_index = layer.tips(text, "i.highlight-mengshou-wrap[data-highlight-id='" + id + "']", {
-                tips: [1, '#3595CC'],
-                time: 0
-            });
-        }
-    })
-    .on(Highlighter.event.HOVER_OUT, ({id}) => {
-        // log('hover out -', id);
-        highlighter.removeClass('highlight-wrap-hover', id);
-
-        if (layer_index) {
-            layer.close(layer_index)
-            layer_index = null
-        }
-    })
-    .on(Highlighter.event.CREATE, ({sources}) => {
-        // log('create -', sources);
-
-        contactBackJs('add', sources)
-
-        $("#johns-editor").remove();
-
-        sources.forEach(s => {
-            //增加锚点
-            let position = getPosition(highlighter.getDoms(s.id)[0])
-
-            let selector = $("#johns-tags>li")
-
-            let arr = []
-
-            selector.each(function (index, v) {
-                let left = v.getAttribute('data-left')
-                let top = v.getAttribute('data-top')
-
-                arr.push({left: parseInt(left), top: parseInt(top), id: $(v).children('a').attr('id')});
-            })
-
-            arr.push({left: position.left, top: position.top, id: s.id})
-
-            arr.sort(mySort)
-
-            let index = arr.findIndex(function (v) {
-                return v.id === s.id
-            })
-
-            if (index > 0) {
-                $("#johns-tags").children("li:eq(" + (index - 1) + ")").after("<li data-left='" + position.left + "' data-top='" + position.top + "'><span></span><a id='" + s.id + "' href=\"javascript:void(0);\" title='" + s.text + "...' class='johns-tag-goto'>" + s.text.slice(0, 10) + "...</a></li>")
-            } else {
-                $("#johns-tags").prepend("<li data-left='" + position.left + "' data-top='" + position.top + "'><span></span><a id='" + s.id + "' href=\"javascript:void(0);\" title='" + s.text + "...' class='johns-tag-goto'>" + s.text.slice(0, 10) + "...</a></li>")
-            }
-        });
-        sources = sources.map(hs => ({hs}));
-        store.save(sources);
-    })
-    .on(Highlighter.event.REMOVE, ({ids}) => {
-        // log('remove -', ids);
-        ids.forEach(id => store.remove(id));
-    });
-
 /**
  * retrieve from local store
  */
@@ -382,25 +300,6 @@ function getIntersection(arrA, arrB) {
     return intersection;
 }
 
-highlighter.hooks.Render.SelectedNodes.tap((id, selectedNodes) => {
-    selectedNodes = selectedNodes.filter(n => n.$node.textContent);
-    if (selectedNodes.length === 0) {
-        return [];
-    }
-
-    const candidates = selectedNodes.slice(1).reduce(
-        (left, selected) => getIntersection(left, getIds(selected)),
-        getIds(selectedNodes[0])
-    );
-    for (let i = 0; i < candidates.length; i++) {
-        if (highlighter.getDoms(candidates[i]).length === selectedNodes.length) {
-            return [];
-        }
-    }
-
-    return selectedNodes;
-});
-
 function remove(id){
     localStorage.removeItem(id)
     // log('*click remove-tip*', id);
@@ -410,110 +309,6 @@ function remove(id){
     $("#johns-editor").remove();
     contactBackJs('remove', id)
 }
-
-document.addEventListener('click', e => {
-    const $ele = e.target;
-
-    // delete highlight
-    if ($ele.classList.contains('js-remove-annotation')) {
-
-        const id = $($ele).parents("#johns-editor").attr("data-id")
-
-        remove(id)
-    } else if ($ele.classList.contains('js-copy')) {
-        const id = $($ele).parents("#johns-editor").attr("data-id")
-        let text = ''
-
-        highlighter.getDoms(id).forEach(function (i) {
-            text += i.textContent
-        })
-
-        copyToClipboard(text)
-        // highlighter.removeClass('highlight-wrap-hover', id);
-        // highlighter.remove(id);
-        $("#johns-editor").remove();
-    } else if ($ele.classList.contains('js-input')) {
-        const id = $($ele).parents("#johns-editor").attr("data-id")
-        let text = localStorage.getItem(id)
-
-        layer.prompt({title: '批注', value: text, formType: 2}, function (pass, index) {
-            if (pass) {
-                localStorage.setItem(id, pass)
-                contactBackJs('add', store.get(id))
-                layer.msg("添加成功")
-            }
-
-            layer.close(index);
-        });
-
-        $("#johns-editor").remove();
-    } else if ($ele.classList.contains('js-input-delete')) {
-        const id = $($ele).parents("#johns-editor").attr("data-id")
-
-        localStorage.removeItem(id)
-
-        contactBackJs('add', store.get(id))
-
-        layer.msg("删除成功")
-
-        $("#johns-editor").remove();
-    } else if ($ele.classList.contains("gtx-johns-icon")) {
-        const selection = window.getSelection();
-        if (selection.isCollapsed) {
-            return;
-        }
-        highlighter.fromRange(selection.getRangeAt(0));
-        window.getSelection().removeAllRanges();
-        $("#johns-highlight").remove()
-    } else if ($ele.classList.contains('johns-tag-goto')) {
-        if ($ele.id) {
-            //锚点跳转
-            goto($ele.id)
-        }
-    } else if (!$ele.classList.contains('highlight-mengshou-wrap')) {
-        $("#johns-editor").remove();
-    }
-});
-
-let hoveredTipId;
-document.addEventListener('mouseover', e => {
-    const $ele = e.target;
-
-    // toggle highlight hover state
-    if ($ele.classList.contains('highlight-mengshou-wrap') && hoveredTipId !== $ele.dataset.id) {
-        hoveredTipId = $ele.dataset.id;
-        highlighter.removeClass('highlight-wrap-hover');
-        highlighter.addClass('highlight-wrap-hover', hoveredTipId);
-    } else if ($ele.id === 'johns-ex-navbar') {
-        $("#johns-ex-navbar>ul").show()
-    } else if (!$ele.classList.contains('highlight-mengshou-wrap')) {
-        highlighter.removeClass('highlight-wrap-hover', hoveredTipId);
-        hoveredTipId = null;
-
-        if ($($ele).parents("div[id='johns-ex-navbar']").length === 0) {
-            $("#johns-ex-navbar>ul").hide()
-        }
-    }
-});
-
-document.addEventListener('mouseup', e => {
-    let text = getSelectedText().toString()
-
-    let $ele = e.target
-
-    if (!$ele.classList.contains("gtx-johns-icon")) {
-        $("#johns-highlight").remove()
-
-        text = text.replace(/\s*/g, "");
-
-        if (text) {
-            let sh = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
-            let left = (e.clientX - 40 < 0) ? e.clientX + 20 : e.clientX - 40,
-                top = (e.clientY - 40 < 0) ? e.clientY + sh + 20 : e.clientY + sh - 40;
-            buildButton(left + 10, top + 8)
-        }
-    }
-});
 
 
 /**
@@ -558,4 +353,242 @@ function buildAnchor() {
 
 // auto-highlight selections
 // highlighter.stop()
-restore();
+
+let hoveredTipId;
+let layer_index = null
+let highlighter
+
+chrome.storage.sync.get(['setting'],function(item){
+    if(!item.setting){
+        chrome.storage.sync.set({setting:{use:true}})
+    }
+
+    if(!item.setting.use){
+        return ;
+    }
+
+    buildAnchor()
+
+    highlighter = new Highlighter({
+        wrapTag: 'i',
+        exceptSelectors: ['.my-remove-tip', 'pre', 'code']
+    });
+
+    document.addEventListener('click', e => {
+        const $ele = e.target;
+
+        // delete highlight
+        if ($ele.classList.contains('js-remove-annotation')) {
+
+            const id = $($ele).parents("#johns-editor").attr("data-id")
+
+            remove(id)
+        } else if ($ele.classList.contains('js-copy')) {
+            const id = $($ele).parents("#johns-editor").attr("data-id")
+            let text = ''
+
+            highlighter.getDoms(id).forEach(function (i) {
+                text += i.textContent
+            })
+
+            copyToClipboard(text)
+            // highlighter.removeClass('highlight-wrap-hover', id);
+            // highlighter.remove(id);
+            $("#johns-editor").remove();
+        } else if ($ele.classList.contains('js-input')) {
+            const id = $($ele).parents("#johns-editor").attr("data-id")
+            let text = localStorage.getItem(id)
+
+            layer.prompt({title: '批注', value: text, formType: 2}, function (pass, index) {
+                if (pass) {
+                    localStorage.setItem(id, pass)
+                    contactBackJs('add', store.get(id))
+                    layer.msg("添加成功")
+                }
+
+                layer.close(index);
+            });
+
+            $("#johns-editor").remove();
+        } else if ($ele.classList.contains('js-input-delete')) {
+            const id = $($ele).parents("#johns-editor").attr("data-id")
+
+            localStorage.removeItem(id)
+
+            contactBackJs('add', store.get(id))
+
+            layer.msg("删除成功")
+
+            $("#johns-editor").remove();
+        } else if ($ele.classList.contains("gtx-johns-icon")) {
+            const selection = window.getSelection();
+            if (selection.isCollapsed) {
+                return;
+            }
+            highlighter.fromRange(selection.getRangeAt(0));
+            window.getSelection().removeAllRanges();
+            $("#johns-highlight").remove()
+        } else if ($ele.classList.contains('johns-tag-goto')) {
+            if ($ele.id) {
+                let id = $ele.id
+                let text = localStorage.getItem(id)
+                if (text) {
+                    layer_index = layer.tips(text, "i.highlight-mengshou-wrap[data-highlight-id='" + id + "']", {
+                        tips: [1, '#3595CC'],
+                        time: 0
+                    });
+                }
+                //锚点跳转
+                goto(id)
+            }
+        } else if (!$ele.classList.contains('highlight-mengshou-wrap')) {
+            $("#johns-editor").remove();
+        }
+    });
+
+    document.addEventListener('mouseover', e => {
+        const $ele = e.target;
+
+        // toggle highlight hover state
+        if ($ele.classList.contains('highlight-mengshou-wrap') && hoveredTipId !== $ele.dataset.id) {
+            hoveredTipId = $ele.dataset.id;
+            highlighter.removeClass('highlight-wrap-hover');
+            highlighter.addClass('highlight-wrap-hover', hoveredTipId);
+        } else if ($ele.id === 'johns-ex-navbar') {
+            $("#johns-ex-navbar>ul").show()
+        }else if($ele.classList.contains("johns-tag-goto")){
+            // let id = $ele.id
+            // let text = localStorage.getItem(id)
+            // if (text) {
+            //     layer_index = layer.tips(text, "i.highlight-mengshou-wrap[data-highlight-id='" + id + "']", {
+            //         tips: [1, '#3595CC'],
+            //         time: 0
+            //     });
+            // }
+            // goto(id)
+        } else if (!$ele.classList.contains('highlight-mengshou-wrap')) {
+            highlighter.removeClass('highlight-wrap-hover', hoveredTipId);
+            hoveredTipId = null;
+
+            if ($($ele).parents("div[id='johns-ex-navbar']").length === 0) {
+                $("#johns-ex-navbar>ul").hide()
+            }
+
+            layer.close(layer_index)
+        }
+    });
+
+    document.addEventListener('mouseup', e => {
+        let text = getSelectedText().toString()
+
+        let $ele = e.target
+
+        if (!$ele.classList.contains("gtx-johns-icon")) {
+            $("#johns-highlight").remove()
+
+            text = text.replace(/\s*/g, "");
+
+            if (text) {
+                let sh = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+                let left = (e.clientX - 40 < 0) ? e.clientX + 20 : e.clientX - 40,
+                    top = (e.clientY - 40 < 0) ? e.clientY + sh + 20 : e.clientY + sh - 40;
+                buildButton(left + 10, top + 8)
+            }
+        }
+    });
+
+    highlighter
+        .on(Highlighter.event.CLICK, ({id}) => {
+            // event.preventDefault()
+            const position = getPosition(highlighter.getDoms(id)[0]);
+            createHtml(position.left - 20, position.top - 20, id)
+            // log('click -', id);
+        })
+        .on(Highlighter.event.HOVER, ({id}) => {
+            // log('hover -', id);
+            highlighter.addClass('highlight-wrap-hover', id);
+
+            let text = localStorage.getItem(id)
+
+            if (text) {
+                layer_index = layer.tips(text, "i.highlight-mengshou-wrap[data-highlight-id='" + id + "']", {
+                    tips: [1, '#3595CC'],
+                    time: 0
+                });
+            }
+        })
+        .on(Highlighter.event.HOVER_OUT, ({id}) => {
+            // log('hover out -', id);
+            highlighter.removeClass('highlight-wrap-hover', id);
+
+            if (layer_index) {
+                layer.close(layer_index)
+                layer_index = null
+            }
+        })
+        .on(Highlighter.event.CREATE, ({sources}) => {
+            // log('create -', sources);
+
+            contactBackJs('add', sources)
+
+            $("#johns-editor").remove();
+
+            sources.forEach(s => {
+                //增加锚点
+                let position = getPosition(highlighter.getDoms(s.id)[0])
+
+                let selector = $("#johns-tags>li")
+
+                let arr = []
+
+                selector.each(function (index, v) {
+                    let left = v.getAttribute('data-left')
+                    let top = v.getAttribute('data-top')
+
+                    arr.push({left: parseInt(left), top: parseInt(top), id: $(v).children('a').attr('id')});
+                })
+
+                arr.push({left: position.left, top: position.top, id: s.id})
+
+                arr.sort(mySort)
+
+                let index = arr.findIndex(function (v) {
+                    return v.id === s.id
+                })
+
+                if (index > 0) {
+                    $("#johns-tags").children("li:eq(" + (index - 1) + ")").after("<li data-left='" + position.left + "' data-top='" + position.top + "'><span></span><a id='" + s.id + "' href=\"javascript:void(0);\" title='" + s.text + "...' class='johns-tag-goto'>" + s.text.slice(0, 10) + "...</a></li>")
+                } else {
+                    $("#johns-tags").prepend("<li data-left='" + position.left + "' data-top='" + position.top + "'><span></span><a id='" + s.id + "' href=\"javascript:void(0);\" title='" + s.text + "...' class='johns-tag-goto'>" + s.text.slice(0, 10) + "...</a></li>")
+                }
+            });
+            sources = sources.map(hs => ({hs}));
+            store.save(sources);
+        })
+        .on(Highlighter.event.REMOVE, ({ids}) => {
+            // log('remove -', ids);
+            ids.forEach(id => store.remove(id));
+        });
+
+    highlighter.hooks.Render.SelectedNodes.tap((id, selectedNodes) => {
+        selectedNodes = selectedNodes.filter(n => n.$node.textContent);
+        if (selectedNodes.length === 0) {
+            return [];
+        }
+
+        const candidates = selectedNodes.slice(1).reduce(
+            (left, selected) => getIntersection(left, getIds(selected)),
+            getIds(selectedNodes[0])
+        );
+        for (let i = 0; i < candidates.length; i++) {
+            if (highlighter.getDoms(candidates[i]).length === selectedNodes.length) {
+                return [];
+            }
+        }
+
+        return selectedNodes;
+    });
+
+    restore();
+    console.log(item)
+})

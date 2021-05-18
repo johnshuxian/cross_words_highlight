@@ -32,7 +32,7 @@
    "manifest_version": 2,
    "name": "划词高亮",
    "options_page": "config.html",
-   "permissions": [ "contextMenus", "storage", "notifications"],
+   "permissions": [ "contextMenus", "storage", "notifications","activeTab"],
    "version": "1.0.0",
    "web_accessible_resources": [
       "theme/chrome/css/fonts/icons.woff2",

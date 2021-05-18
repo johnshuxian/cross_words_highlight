@@ -97,6 +97,9 @@ async function getData(){
         chrome.storage.sync.get(null, function (list){
             let info = [];
             for (let key in list){
+                if(!/highlight-mengshou-/.test(key)){
+                    continue
+                }
                 let nums = list[key].length
                 let commentNums = 0
 
@@ -165,6 +168,11 @@ $(function(){
         created() {
             let that = this
              init(that)
+
+            chrome.storage.sync.get(['setting'],function (item){
+                that.extensionSettings = item.setting||{use:true}
+                console.log(that.extensionSettings)
+            })
         },
         filters: {
             ellipsis (value) {
@@ -184,7 +192,7 @@ $(function(){
         methods: {
             tableRowClassName({row, rowIndex}) {
                 if(rowIndex % 2 === 1){
-                    return 'warning-row';
+                    return 'success-row'
                 }
 
                 return '';
@@ -306,6 +314,15 @@ $(function(){
             errorHandler(){
               return false;
             },
+            statusChange(val){
+                chrome.storage.sync.set({setting:{use:val}},function (){
+                    chrome.contextMenus.update('stopUse',{checked: !val},function (){
+                        chrome.tabs.query({'active': true, 'currentWindow': true}, function(tabs) {
+                            chrome.tabs.update(tabs[0].id, {url: tabs[0].url});
+                        });
+                    })
+                })
+            },
             open(text) {
                 this.$confirm('复制文字', '提示', {
                     confirmButtonText: '确定',
@@ -337,8 +354,9 @@ $(function(){
                 value:'',
                 tableDataLength:0,
                 currentPage:1, //初始页
-                pageSize:5,    //每页的数据
-                loading: true
+                pageSize:6,    //每页的数据
+                loading: true,
+                extensionSettings:[]//设置
             }
         }
     }
