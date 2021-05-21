@@ -317,9 +317,7 @@ $(function(){
             statusChange(val){
                 chrome.storage.sync.set({setting:{use:val}},function (){
                     chrome.contextMenus.update('stopUse',{checked: !val},function (){
-                        chrome.tabs.query({'active': true, 'currentWindow': true}, function(tabs) {
-                            chrome.tabs.update(tabs[0].id, {url: tabs[0].url});
-                        });
+                        chrome.runtime.sendMessage({from: "pop_js", action: 'reload', data:[]}, function (response) {});
                     })
                 })
             },

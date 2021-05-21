@@ -29,7 +29,17 @@ chrome.runtime.onMessage.addListener(
 
             // chrome.runtime.sendMessage({from: "bg_js", action: request.action,data:request.data}, function (response) {});
 
-        }
+        }else if(request.from === 'pop_js'){
+            switch (request.action){
+               case "reload":
+                   chrome.tabs.query({'active': true, 'currentWindow': true}, function(tabs) {
+                       chrome.tabs.executeScript(tabs[0].id,{
+                           code:"location.reload()"
+                       })
+                   });
+                   break;
+            }
+         }
     }
 );
 
