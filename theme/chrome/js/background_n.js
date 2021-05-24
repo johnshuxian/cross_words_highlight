@@ -157,7 +157,7 @@ function getStorageSyncData(key) {
 const options = {
     type: 'checkbox',
     id: 'stopUse',
-    title: '扩展停用',
+    title: 'disable',
     checked: false,
     onclick: function (info,tab){
         chrome.storage.sync.set({setting:{use:!info.checked}},function (){

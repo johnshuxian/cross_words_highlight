@@ -58,7 +58,7 @@
                       :data="gridData.filter(data => !value || data.text.toLowerCase().includes(value.toLowerCase()) || data.comment.toLowerCase().includes(value.toLowerCase()))"
                       :row-class-name="tableRowClassName"
                       height="350">
-                <el-table-column :show-overflow-tooltip="true" property="text" label="contents">
+                <el-table-column :show-overflow-tooltip="true" property="text" label="Contents">
                     <template slot-scope="scope">
                         <!-- 新增鼠标移动到名称位置显示全部 -->
                         <!--                        <el-popover-->
@@ -74,7 +74,7 @@
                         </el-button>
                     </template>
                 </el-table-column>
-                <el-table-column :show-overflow-tooltip="true" @click="open" property="comment" label="comments">
+                <el-table-column :show-overflow-tooltip="true" @click="open" property="comment" label="Comments">
                     <template slot-scope="scope">
                         <!--                        <el-popover-->
                         <!--                                placement="top-start"-->
@@ -98,18 +98,18 @@
                         <el-input
                                 v-model="value"
                                 size="mini"
-                                placeholder="search"/>
+                                placeholder="Search"/>
                     </template>
                     <template slot-scope="scope">
                         <!--                        <el-button @click="openUrl(scope.row.href)" type="text" size="small">查看</el-button>-->
                         <!--                        <el-button  @click="getDetail(scope.row.hs)" type="text" size="small">详情</el-button>-->
-                        <el-button type="text" @click="delDetail(scope.$index,scope.row)" size="small">delete</el-button>
+                        <el-button type="text" @click="delDetail(scope.$index,scope.row)" size="small">Delete</el-button>
                     </template>
                 </el-table-column>
 
             </el-table>
             <div slot="footer" class="dialog-footer">
-                <el-button @click="dialogTableVisible = false">close</el-button>
+                <el-button @click="dialogTableVisible = false">Close</el-button>
             </div>
         </el-dialog>
         <el-table
@@ -123,7 +123,7 @@
         >
             <el-table-column
                     prop="icon"
-                    label="station"
+                    label="Site"
             >
                 <template slot-scope="scope">
                     <!--                    <el-image style="width: 20px" :src="scope.row.icon">-->
@@ -139,7 +139,7 @@
             </el-table-column>
             <el-table-column
                     prop="title"
-                    label="title"
+                    label="Title"
                     :show-overflow-tooltip="true"
                     min-width="150"
             >
@@ -149,17 +149,17 @@
                     prop="nums"
                     sortable="custom"
                     width="120"
-                    label="highlights">
+                    label="Highlights">
             </el-table-column>
             <el-table-column
                     prop="commentNums"
                     sortable="custom"
                     width="120"
-                    label="comments">
+                    label="Comments">
             </el-table-column>
             <el-table-column
                     prop="readDate"
-                    label="read time"
+                    label="Read time"
                     sortable="custom"
                     width="160"
 
@@ -175,12 +175,12 @@
                             scope
                             v-model="search"
                             size="mini"
-                            placeholder="search"/>
+                            placeholder="Search"/>
                 </template>
                 <template slot-scope="scope">
-                    <el-button @click="openUrl(scope.row.href)" type="text" size="small">read</el-button>
-                    <el-button @click="getDetail(scope.row.hs)" type="text" size="small">detail</el-button>
-                    <el-button type="text" @click="del(scope.row.key)" size="small">delete</el-button>
+                    <el-button @click="openUrl(scope.row.href)" type="text" size="small">Read</el-button>
+                    <el-button @click="getDetail(scope.row.hs)" type="text" size="small">Detail</el-button>
+                    <el-button type="text" @click="del(scope.row.key)" size="small">Delete</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -202,8 +202,8 @@
                 @change="statusChange"
                 active-color="#13ce66"
                 inactive-color="#ff4949"
-                active-text="On"
-                inactive-text="Off">
+                active-text="ON"
+                inactive-text="OFF">
         </el-switch>
     </template>
 </div>
