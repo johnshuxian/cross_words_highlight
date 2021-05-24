@@ -379,11 +379,12 @@ chrome.storage.sync.get(['setting'],function(item){
 
         // delete highlight
         if ($ele.classList.contains('js-remove-annotation')) {
-
+            e.preventDefault()
             const id = $($ele).parents("#johns-editor").attr("data-id")
 
             remove(id)
         } else if ($ele.classList.contains('js-copy')) {
+            e.preventDefault()
             const id = $($ele).parents("#johns-editor").attr("data-id")
             let text = ''
 
@@ -398,6 +399,7 @@ chrome.storage.sync.get(['setting'],function(item){
         } else if ($ele.classList.contains('js-input')) {
             const id = $($ele).parents("#johns-editor").attr("data-id")
             let text = localStorage.getItem(id)
+            e.preventDefault()
 
             layer.prompt({title: '批注', value: text, formType: 2}, function (pass, index) {
                 if (pass) {
@@ -411,6 +413,7 @@ chrome.storage.sync.get(['setting'],function(item){
 
             $("#johns-editor").remove();
         } else if ($ele.classList.contains('js-input-delete')) {
+            e.preventDefault()
             const id = $($ele).parents("#johns-editor").attr("data-id")
 
             localStorage.removeItem(id)
@@ -421,6 +424,7 @@ chrome.storage.sync.get(['setting'],function(item){
 
             $("#johns-editor").remove();
         } else if ($ele.classList.contains("gtx-johns-icon")) {
+            e.preventDefault()
             const selection = window.getSelection();
             if (selection.isCollapsed) {
                 return;
@@ -429,6 +433,7 @@ chrome.storage.sync.get(['setting'],function(item){
             window.getSelection().removeAllRanges();
             $("#johns-highlight").remove()
         } else if ($ele.classList.contains('johns-tag-goto')) {
+            e.preventDefault()
             if ($ele.id) {
                 let id = $ele.id
                 let text = localStorage.getItem(id)
