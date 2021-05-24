@@ -322,21 +322,21 @@ $(function(){
                 })
             },
             open(text) {
-                this.$confirm('复制文字', '提示', {
-                    confirmButtonText: '确定',
-                    cancelButtonText: '取消',
+                this.$confirm('Copy the text', '', {
+                    confirmButtonText: 'Yes',
+                    cancelButtonText: 'No',
                     type: 'info'
                 }).then(() => {
                     copyToClipboard(text)
                     this.$message({
                         type: 'success',
-                        message: '复制成功!'
+                        message: 'success!'
                     });
                 }).catch(() => {
-                    this.$message({
-                        type: 'info',
-                        message: '取消复制'
-                    });
+                    // this.$message({
+                    //     type: 'info',
+                    //     message: 'cancel'
+                    // });
                 });
             }
         },

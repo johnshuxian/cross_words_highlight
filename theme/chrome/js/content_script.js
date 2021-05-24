@@ -119,7 +119,7 @@ function copyToClipboard(t) {
     input.select();
     if (document.execCommand('copy')) {
         document.execCommand('copy');
-        layer.msg('复制成功')
+        layer.msg('Copy success')
         // console.log('复制成功',t);
     }
     document.body.removeChild(input);
@@ -130,7 +130,7 @@ function createHtml(left, top, id) {
 
     let display = localStorage.getItem(id) ? 'list-item' : 'none';
 
-    let html = "<div id=\"johns-editor\" data-id='" + id + "' style=\"z-index:100000000;left: " + left + "px; top: " + top + "px; display: block;\"><ul class=\"dropdown-list\"><li style='text-align: center'><a  onclick='return false;'  href=\"#\" class=\"js-copy\">复制</a></li><li class=\"js-remove-annotation-wrapper\" style=\"display: list-item;text-align: center\"><a href=\"#\" onclick='return false;' class=\"js-remove-annotation\">移除高亮</a></li><li style='text-align: center'><a  onclick='return false;'  href=\"#\" class=\"js-input\">相关批注</a></li><li style='text-align: center;display: " + display + "'><a  onclick='return false;'  href=\"#\" class=\"js-input-delete\">删除批注</a></li></ul></div>"
+    let html = "<div id=\"johns-editor\" data-id='" + id + "' style=\"z-index:100000000;left: " + left + "px; top: " + top + "px; display: block;\"><ul class=\"dropdown-list\"><li style='text-align: center'><a  onclick='return false;'  href=\"#\" class=\"js-copy\">copy</a></li><li class=\"js-remove-annotation-wrapper\" style=\"display: list-item;text-align: center\"><a href=\"#\" onclick='return false;' class=\"js-remove-annotation\">remove</a></li><li style='text-align: center'><a  onclick='return false;'  href=\"#\" class=\"js-input\">comment</a></li><li style='text-align: center;display: " + display + "'><a  onclick='return false;'  href=\"#\" class=\"js-input-delete\">remove comment</a></li></ul></div>"
 
     $("body").prepend(html)
 }
@@ -401,11 +401,11 @@ chrome.storage.sync.get(['setting'],function(item){
             let text = localStorage.getItem(id)
             e.preventDefault()
 
-            layer.prompt({title: '批注', value: text, formType: 2}, function (pass, index) {
+            layer.prompt({title: 'comment', value: text, formType: 2,btn:['Done','Cancel']}, function (pass, index) {
                 if (pass) {
                     localStorage.setItem(id, pass)
                     contactBackJs('add', store.get(id))
-                    layer.msg("添加成功")
+                    // layer.msg("添加成功")
                 }
 
                 layer.close(index);
@@ -420,7 +420,7 @@ chrome.storage.sync.get(['setting'],function(item){
 
             contactBackJs('add', store.get(id))
 
-            layer.msg("删除成功")
+            // layer.msg("done!")
 
             $("#johns-editor").remove();
         } else if ($ele.classList.contains("gtx-johns-icon")) {

@@ -55,10 +55,10 @@
         <el-dialog @close='closeDialog' :fullscreen="true" :visible.sync="dialogTableVisible">
             <el-table
                     :border="true"
-                      :data="gridData.filter(data => !value || data.text.toLowerCase().includes(value.toLowerCase()))"
+                      :data="gridData.filter(data => !value || data.text.toLowerCase().includes(value.toLowerCase()) || data.comment.toLowerCase().includes(value.toLowerCase()))"
                       :row-class-name="tableRowClassName"
                       height="350">
-                <el-table-column :show-overflow-tooltip="true" property="text" label="内容">
+                <el-table-column :show-overflow-tooltip="true" property="text" label="contents">
                     <template slot-scope="scope">
                         <!-- 新增鼠标移动到名称位置显示全部 -->
                         <!--                        <el-popover-->
@@ -74,7 +74,7 @@
                         </el-button>
                     </template>
                 </el-table-column>
-                <el-table-column :show-overflow-tooltip="true" @click="open" property="comment" label="批注">
+                <el-table-column :show-overflow-tooltip="true" @click="open" property="comment" label="comments">
                     <template slot-scope="scope">
                         <!--                        <el-popover-->
                         <!--                                placement="top-start"-->
@@ -98,18 +98,18 @@
                         <el-input
                                 v-model="value"
                                 size="mini"
-                                placeholder="内容搜索"/>
+                                placeholder="search"/>
                     </template>
                     <template slot-scope="scope">
                         <!--                        <el-button @click="openUrl(scope.row.href)" type="text" size="small">查看</el-button>-->
                         <!--                        <el-button  @click="getDetail(scope.row.hs)" type="text" size="small">详情</el-button>-->
-                        <el-button type="text" @click="delDetail(scope.$index,scope.row)" size="small">删除</el-button>
+                        <el-button type="text" @click="delDetail(scope.$index,scope.row)" size="small">delete</el-button>
                     </template>
                 </el-table-column>
 
             </el-table>
             <div slot="footer" class="dialog-footer">
-                <el-button @click="dialogTableVisible = false">关闭</el-button>
+                <el-button @click="dialogTableVisible = false">close</el-button>
             </div>
         </el-dialog>
         <el-table
@@ -123,7 +123,7 @@
         >
             <el-table-column
                     prop="icon"
-                    label="站点"
+                    label="station"
             >
                 <template slot-scope="scope">
                     <!--                    <el-image style="width: 20px" :src="scope.row.icon">-->
@@ -139,7 +139,7 @@
             </el-table-column>
             <el-table-column
                     prop="title"
-                    label="标题"
+                    label="title"
                     :show-overflow-tooltip="true"
                     min-width="150"
             >
@@ -148,20 +148,20 @@
             <el-table-column
                     prop="nums"
                     sortable="custom"
-                    width="100"
-                    label="高亮数">
+                    width="120"
+                    label="highlights">
             </el-table-column>
             <el-table-column
                     prop="commentNums"
                     sortable="custom"
-                    width="100"
-                    label="批注数">
+                    width="120"
+                    label="comments">
             </el-table-column>
             <el-table-column
                     prop="readDate"
-                    label="最后阅读时间"
+                    label="read time"
                     sortable="custom"
-                    width="200"
+                    width="160"
 
             >
             </el-table-column>
@@ -175,12 +175,12 @@
                             scope
                             v-model="search"
                             size="mini"
-                            placeholder="标题搜索"/>
+                            placeholder="search"/>
                 </template>
                 <template slot-scope="scope">
-                    <el-button @click="openUrl(scope.row.href)" type="text" size="small">查看</el-button>
-                    <el-button @click="getDetail(scope.row.hs)" type="text" size="small">详情</el-button>
-                    <el-button type="text" @click="del(scope.row.key)" size="small">删除</el-button>
+                    <el-button @click="openUrl(scope.row.href)" type="text" size="small">read</el-button>
+                    <el-button @click="getDetail(scope.row.hs)" type="text" size="small">detail</el-button>
+                    <el-button type="text" @click="del(scope.row.key)" size="small">delete</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -202,8 +202,8 @@
                 @change="statusChange"
                 active-color="#13ce66"
                 inactive-color="#ff4949"
-                active-text="启用"
-                inactive-text="已停用">
+                active-text="On"
+                inactive-text="Off">
         </el-switch>
     </template>
 </div>
