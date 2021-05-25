@@ -33,7 +33,7 @@
    "name": "Cross Words Highlight 划词高亮",
    "options_page": "config.html",
    "permissions": [ "contextMenus", "storage","activeTab"],
-   "version": "1.0.2",
+   "version": "1.0.3",
    "web_accessible_resources": [
       "theme/chrome/css/fonts/icons.woff2",
       "theme/chrome/css/fonts/icons.eot",
