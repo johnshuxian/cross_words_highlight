@@ -2,7 +2,7 @@ function getStorageSyncData(key) {
     // Immediately return a promise and start asynchronous work
     return new Promise((resolve, reject) => {
         // Asynchronously fetch all data from storage.sync.
-        chrome.storage.sync.get(key, (items) => {
+        chrome.storage.local.get(key, (items) => {
             // Pass any observed errors down the promise chain.
             if (chrome.runtime.lastError) {
                 return reject(chrome.runtime.lastError);
@@ -31,9 +31,9 @@ const store = class LocalStore {
 
     jsonToStore(stores) {
         if(stores.length === 0){
-            chrome.storage.sync.remove([this.key],function (){})
+            chrome.storage.local.remove([this.key],function (){})
         }else{
-            chrome.storage.sync.set({[this.key]:stores}, function(res) {})
+            chrome.storage.local.set({[this.key]:stores}, function(res) {})
         }
         // localStorage.setItem(this.key, JSON.stringify(stores));
     }
@@ -94,7 +94,7 @@ const store = class LocalStore {
 
 async function getData(){
     const res = await new Promise(((resolve, reject) => {
-        chrome.storage.sync.get(null, function (list){
+        chrome.storage.local.get(null, function (list){
             let info = [];
             for (let key in list){
                 if(!/highlight-mengshou-/.test(key)){
@@ -171,7 +171,6 @@ $(function(){
 
             chrome.storage.sync.get(['setting'],function (item){
                 that.extensionSettings = item.setting||{use:true}
-                console.log(that.extensionSettings)
             })
         },
         filters: {
@@ -222,7 +221,7 @@ $(function(){
             },
             del(key){
                 let that = this
-                chrome.storage.sync.remove(key,function (){
+                chrome.storage.local.remove(key,function (){
                     const totalPage = Math.ceil((that.tableDataLength - 1) / that.pageSize) // 总页数
                     const currentPage = that.currentPage > totalPage ? totalPage : that.currentPage
                     that.currentPage = that.currentPage < 1 ? 1 : currentPage

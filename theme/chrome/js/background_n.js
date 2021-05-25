@@ -9,7 +9,7 @@ chrome.runtime.onMessage.addListener(
                 case "add":
                     info = request.data
 
-                     info.sources = info.sources.map(hs => ({hs}));
+                    info.sources = info.sources.map(hs => ({hs}));
 
                     // console.log(info.sources)
                     stores = new store(info.href)
@@ -49,7 +49,7 @@ chrome.runtime.onMessage.addListener(
 // chrome.storage.onChanged.addListener(function (changes, namespace) {
 //     for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
 //         if(namespace === 'sync'){
-//             chrome.storage.sync.get([key],function (res){
+//             chrome.storage.local.get([key],function (res){
 //                 console.log(res)
 //             })
 //         }
@@ -78,9 +78,9 @@ const store = class LocalStore {
 
     jsonToStore(stores) {
         if(stores.length === 0){
-            chrome.storage.sync.remove([this.key])
+            chrome.storage.local.remove([this.key])
         }else{
-            chrome.storage.sync.set({[this.key]:stores}, function(res) {})
+            chrome.storage.local.set({[this.key]:stores}, function(res) {})
         }
         // localStorage.setItem(this.key, JSON.stringify(stores));
     }
@@ -142,8 +142,8 @@ const store = class LocalStore {
 function getStorageSyncData(key) {
     // Immediately return a promise and start asynchronous work
     return new Promise((resolve, reject) => {
-        // Asynchronously fetch all data from storage.sync.
-        chrome.storage.sync.get(key, (items) => {
+        // Asynchronously fetch all data from storage.local.
+        chrome.storage.local.get(key, (items) => {
             // Pass any observed errors down the promise chain.
             if (chrome.runtime.lastError) {
                 return reject(chrome.runtime.lastError);

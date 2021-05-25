@@ -189,7 +189,7 @@ function restore() {
 
     store.removeAll()
 
-    chrome.storage.sync.get([bg_key], function (res) {
+    chrome.storage.local.get([bg_key], function (res) {
         if (res[bg_key]) {
             res[bg_key].forEach(function ({hs}) {
                 highlighter.fromStore(hs.startMeta, hs.endMeta, hs.text, hs.id, hs.extra)
@@ -341,14 +341,16 @@ function buildButton(left, top) {
 }
 
 function buildAnchor() {
-    let html = "<div id=\"johns-ex-navbar\"><i class=\"johns-fa\">📑</i>" +
-        "<ul id='johns-tags' style='padding-top: 5px;'>" +
-        "</ul>" +
-        "</div>";
-
-    $("body").append(html)
-
-    dragFunc("johns-ex-navbar");
+    $("body").prepend("<div class=\"johns-menu-wrap\">\n" +
+        "        <input type=\"checkbox\" class=\"toggler\">\n" +
+        "        <div class=\"hamburger\"><div></div></div>\n" +
+        "        <div class=\"johns-menu\" id='johns-ex-navbar'>\n" +
+        "            <div>\n" +
+        "                <ul id='johns-tags'>\n"+
+        "                </ul>\n" +
+        "            </div>\n" +
+        "        </div>\n" +
+        "    </div>")
 }
 
 // auto-highlight selections
@@ -459,25 +461,9 @@ chrome.storage.sync.get(['setting'],function(item){
             hoveredTipId = $ele.dataset.id;
             highlighter.removeClass('highlight-wrap-hover');
             highlighter.addClass('highlight-wrap-hover', hoveredTipId);
-        } else if ($ele.id === 'johns-ex-navbar') {
-            $("#johns-ex-navbar>ul").show()
-        }else if($ele.classList.contains("johns-tag-goto")){
-            // let id = $ele.id
-            // let text = localStorage.getItem(id)
-            // if (text) {
-            //     layer_index = layer.tips(text, "i.highlight-mengshou-wrap[data-highlight-id='" + id + "']", {
-            //         tips: [1, '#3595CC'],
-            //         time: 0
-            //     });
-            // }
-            // goto(id)
-        } else if (!$ele.classList.contains('highlight-mengshou-wrap')) {
+        }else if (!$ele.classList.contains('highlight-mengshou-wrap')) {
             highlighter.removeClass('highlight-wrap-hover', hoveredTipId);
             hoveredTipId = null;
-
-            if ($($ele).parents("div[id='johns-ex-navbar']").length === 0) {
-                $("#johns-ex-navbar>ul").hide()
-            }
 
             layer.close(layer_index)
         }
@@ -595,5 +581,4 @@ chrome.storage.sync.get(['setting'],function(item){
     });
 
     restore();
-    console.log(item)
 })
