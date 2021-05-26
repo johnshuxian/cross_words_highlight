@@ -119,7 +119,7 @@ function copyToClipboard(t) {
     input.select();
     if (document.execCommand('copy')) {
         document.execCommand('copy');
-        layer.msg('Copy success')
+        layer.msg('Copy success!')
         // console.log('复制成功',t);
     }
     document.body.removeChild(input);
@@ -144,11 +144,21 @@ function goto(id) {
     // console.log(position)
     const currentY = document.documentElement.scrollTop || document.body.scrollTop
 
-    scrollAnimation(position.left,currentY,position.top - window.screen.availHeight / 2)
+    scrollAnimation(position.left, currentY, position.top - window.screen.availHeight / 2)
     // window.scrollTo(position.left, position.top - window.screen.availHeight / 2);
 }
 
-function scrollAnimation(targetX,currentY, targetY) {
+function handleText(text, len) {
+    let length = text.length
+
+    if (length <= len) {
+        return text
+    }
+
+    return text.substring(0, len) + '...'
+}
+
+function scrollAnimation(targetX, currentY, targetY) {
     // 获取当前位置方法
 
     // 计算需要移动的距离
@@ -161,7 +171,7 @@ function scrollAnimation(targetX,currentY, targetY) {
         window.scrollTo(_currentY, currentY)
         // 如果移动幅度小于十个像素，直接移动，否则递归调用，实现动画效果
         if (needScrollTop > 10 || needScrollTop < -10) {
-            scrollAnimation(targetX,_currentY, targetY)
+            scrollAnimation(targetX, _currentY, targetY)
         } else {
             window.scrollTo(targetX, targetY)
         }
@@ -250,20 +260,20 @@ function contactBackJs(action = 'add', sources) {
 
             let icon
 
-            if(favicon.length){
+            if (favicon.length) {
                 icon = favicon.attr('href')
-            }else{
+            } else {
                 icon = '/favicon.ico'
             }
 
-            if(!/https?:/.test(icon)){
-                if(/^\/\w+/.test(icon)){
-                    icon = location.protocol + '//' + info.host+icon
-                }else if(/^\w+/.test(icon)){
-                    icon = location.protocol + '//' + info.host+'/'+icon
-                }else if(/^\/\/\w+/.test(icon)){
-                    icon = location.protocol+icon
-                }else{
+            if (!/https?:/.test(icon)) {
+                if (/^\/\w+/.test(icon)) {
+                    icon = location.protocol + '//' + info.host + icon
+                } else if (/^\w+/.test(icon)) {
+                    icon = location.protocol + '//' + info.host + '/' + icon
+                } else if (/^\/\/\w+/.test(icon)) {
+                    icon = location.protocol + icon
+                } else {
                     icon = ''
                 }
             }
@@ -274,7 +284,7 @@ function contactBackJs(action = 'add', sources) {
                 store.comment = localStorage.getItem(store.id) || ''
                 store.href = info.href
                 store.title = info.title
-                store.icon  = icon
+                store.icon = icon
                 store.readDate = new Date().Format("yyyy-MM-dd hh:mm:ss")
                 store.position = position
                 sources[idx] = store
@@ -300,7 +310,7 @@ function getIntersection(arrA, arrB) {
     return intersection;
 }
 
-function remove(id){
+function remove(id) {
     localStorage.removeItem(id)
     // log('*click remove-tip*', id);
     highlighter.removeClass('highlight-wrap-hover', id);
@@ -342,11 +352,11 @@ function buildButton(left, top) {
 
 function buildAnchor() {
     $("body").prepend("<div class=\"johns-menu-wrap\">\n" +
-        "        <input type=\"checkbox\" class=\"toggler\">\n" +
+        "        <input type=\"checkbox\" id='john-checkbox' class=\"toggler\">\n" +
         "        <div class=\"hamburger\"><div></div></div>\n" +
         "        <div class=\"johns-menu\" id='johns-ex-navbar'>\n" +
         "            <div>\n" +
-        "                <ul id='johns-tags'>\n"+
+        "                <ul id='johns-tags'>\n" +
         "                </ul>\n" +
         "            </div>\n" +
         "        </div>\n" +
@@ -360,13 +370,13 @@ let hoveredTipId;
 let layer_index = null
 let highlighter
 
-chrome.storage.sync.get(['setting'],function(item){
-    if(!item.setting){
-        chrome.storage.sync.set({setting:{use:true}})
+chrome.storage.sync.get(['setting'], function (item) {
+    if (!item.setting) {
+        chrome.storage.sync.set({setting: {use: true}})
     }
 
-    if(!item.setting.use){
-        return ;
+    if (!item.setting.use) {
+        return;
     }
 
     buildAnchor()
@@ -403,11 +413,11 @@ chrome.storage.sync.get(['setting'],function(item){
             let text = localStorage.getItem(id)
             e.preventDefault()
 
-            layer.prompt({title: 'comment', value: text, formType: 2,btn:['Done','Cancel']}, function (pass, index) {
+            layer.prompt({title: 'comment', value: text, formType: 2, btn: ['Done', 'Cancel']}, function (pass, index) {
                 if (pass) {
                     localStorage.setItem(id, pass)
                     contactBackJs('add', store.get(id))
-                    // layer.msg("添加成功")
+                    layer.msg("Add success!")
                 }
 
                 layer.close(index);
@@ -451,6 +461,10 @@ chrome.storage.sync.get(['setting'],function(item){
         } else if (!$ele.classList.contains('highlight-mengshou-wrap')) {
             $("#johns-editor").remove();
         }
+
+        if($($ele).parents('.johns-menu').length === 0 && $($ele).attr('id') !== 'john-checkbox' && $("#john-checkbox").is(":checked")){
+            $("#john-checkbox").click()
+        }
     });
 
     document.addEventListener('mouseover', e => {
@@ -461,7 +475,7 @@ chrome.storage.sync.get(['setting'],function(item){
             hoveredTipId = $ele.dataset.id;
             highlighter.removeClass('highlight-wrap-hover');
             highlighter.addClass('highlight-wrap-hover', hoveredTipId);
-        }else if (!$ele.classList.contains('highlight-mengshou-wrap')) {
+        } else if (!$ele.classList.contains('highlight-mengshou-wrap')) {
             highlighter.removeClass('highlight-wrap-hover', hoveredTipId);
             hoveredTipId = null;
 
@@ -474,7 +488,7 @@ chrome.storage.sync.get(['setting'],function(item){
 
         let $ele = e.target
 
-        if (!$ele.classList.contains("gtx-johns-icon")) {
+        if (!$ele.classList.contains("gtx-johns-icon") && $($ele).parents('.johns-menu').length === 0) {
             $("#johns-highlight").remove()
 
             text = text.replace(/\s*/g, "");
@@ -548,9 +562,9 @@ chrome.storage.sync.get(['setting'],function(item){
                 })
 
                 if (index > 0) {
-                    $("#johns-tags").children("li:eq(" + (index - 1) + ")").after("<li data-left='" + position.left + "' data-top='" + position.top + "'><span></span><a id='" + s.id + "' href=\"javascript:void(0);\" title='" + s.text + "...' class='johns-tag-goto'>" + s.text.slice(0, 10) + "...</a></li>")
+                    $("#johns-tags").children("li:eq(" + (index - 1) + ")").after("<li data-left='" + position.left + "' data-top='" + position.top + "'><span></span><a id='" + s.id + "' href=\"javascript:void(0);\" title='" + s.text + "' class='johns-tag-goto'>" + handleText(s.text,20) + "</a></li>")
                 } else {
-                    $("#johns-tags").prepend("<li data-left='" + position.left + "' data-top='" + position.top + "'><span></span><a id='" + s.id + "' href=\"javascript:void(0);\" title='" + s.text + "...' class='johns-tag-goto'>" + s.text.slice(0, 10) + "...</a></li>")
+                    $("#johns-tags").prepend("<li data-left='" + position.left + "' data-top='" + position.top + "'><span></span><a id='" + s.id + "' href=\"javascript:void(0);\" title='" + s.text + "' class='johns-tag-goto'>" + handleText(s.text,20) + "</a></li>")
                 }
             });
             sources = sources.map(hs => ({hs}));
