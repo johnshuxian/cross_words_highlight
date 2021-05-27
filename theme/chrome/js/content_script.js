@@ -132,9 +132,13 @@ function createHtml(left, top, id) {
 
     let display = localStorage.getItem(id) ? 'list-item' : 'none';
 
-    let html = "<div id=\"johns-editor\" data-id='" + id + "' style=\"z-index:100000000;left: " + left + "px; top: " + top + "px; display: block;\"><ul class=\"dropdown-list\"><li style='text-align: center'><a  onclick='return false;'  href=\"#\" class=\"js-copy\">copy</a></li><li class=\"js-remove-annotation-wrapper\" style=\"display: list-item;text-align: center\"><a href=\"#\" onclick='return false;' class=\"js-remove-annotation\">remove</a></li><li style='text-align: center'><a  onclick='return false;'  href=\"#\" class=\"js-input\">comment</a></li><li style='text-align: center;display: " + display + "'><a  onclick='return false;'  href=\"#\" class=\"js-input-delete\">remove comment</a></li></ul></div>"
+    let html = "<div id=\"johns-editor\" data-id='" + id + "' style=\"z-index:100000000;left: " + left + "px; top: " + top + "px; display: block;\"><ul class=\"dropdown-list\"><li class=\"colors\" style=\"display: list-item;\"><span data-color=\"yellow\" class=\"js-color-picker color yellow \"></span><span data-color=\"green\" class=\"js-color-picker color green \"></span><span data-color=\"pink\" class=\"js-color-picker color pink \"></span><span data-color=\"blue\" class=\"js-color-picker color blue \"></span></li><li style='text-align: center'><a  onclick='return false;'  href=\"#\" class=\"js-copy\">copy</a></li><li class=\"js-remove-annotation-wrapper\" style=\"display: list-item;text-align: center\"><a href=\"#\" onclick='return false;' class=\"js-remove-annotation\">remove</a></li><li style='text-align: center'><a  onclick='return false;'  href=\"#\" class=\"js-input\">comment</a></li><li style='text-align: center;display: " + display + "'><a  onclick='return false;'  href=\"#\" class=\"js-input-delete\">remove comment</a></li></ul></div>"
 
     $("body").prepend(html)
+
+    let color = localStorage.getItem(id + '-color') || 'yellow'
+
+    $("#johns-editor span."+color).addClass('active')
 }
 
 /**
@@ -284,12 +288,15 @@ function contactBackJs(action = 'add', sources) {
             sources.forEach(function (store, idx) {
                 let position = getPosition(highlighter.getDoms(store.id)[0]);
                 store.comment = localStorage.getItem(store.id) || ''
+                store.color = localStorage.getItem(store.id + '-color') || 'yellow'
                 store.href = info.href
                 store.title = info.title
                 store.icon = icon
                 store.readDate = new Date().Format("yyyy-MM-dd hh:mm:ss")
                 store.position = position
                 sources[idx] = store
+
+                $("i.highlight-mengshou-wrap[data-highlight-id='" + store.id + "']").attr('class','highlight-mengshou-wrap annotation '+store.color)
             })
 
             info.sources = sources;
@@ -335,7 +342,7 @@ function dragFunc(id) {
     let endY;
     let oldY = localStorage.getItem('johns-menu-top');
 
-    if(oldY){
+    if (oldY) {
         Drag.style.top = oldY
     }
 
@@ -361,13 +368,13 @@ function dragFunc(id) {
         endX = e.clientX;
         endY = e.clientY;
 
-        if(Math.abs(endY-beginY) >= 5){
+        if (Math.abs(endY - beginY) >= 5) {
             isMove = true
-        }else{
+        } else {
             isMove = false
         }
 
-        localStorage.setItem('johns-menu-top',Drag.style.top)
+        localStorage.setItem('johns-menu-top', Drag.style.top)
     };
 }
 
@@ -494,6 +501,20 @@ chrome.storage.sync.get(['setting'], function (item) {
                 //锚点跳转
                 goto(id)
             }
+        } else if ($ele.classList.contains('js-color-picker') && $($ele).parents('#johns-editor').length !== 0) {
+            //选择了颜色
+            e.preventDefault()
+            const id = $($ele).parents("#johns-editor").attr("data-id")
+
+            let color = $($ele).attr('data-color');
+            localStorage.setItem(id + '-color', color)
+
+            $($ele).siblings('.active').removeClass('active')
+
+            $($ele).addClass('active')
+
+            contactBackJs('add', store.get(id))
+
         } else if (!$ele.classList.contains('highlight-mengshou-wrap')) {
             $("#johns-editor").remove();
         }
@@ -508,12 +529,12 @@ chrome.storage.sync.get(['setting'], function (item) {
 
         // toggle highlight hover state
         if ($ele.classList.contains('highlight-mengshou-wrap') && hoveredTipId !== $ele.dataset.id) {
-            hoveredTipId = $ele.dataset.id;
-            highlighter.removeClass('highlight-wrap-hover');
-            highlighter.addClass('highlight-wrap-hover', hoveredTipId);
+            // hoveredTipId = $ele.dataset.id;
+            // highlighter.removeClass('highlight-wrap-hover');
+            // highlighter.addClass('highlight-wrap-hover', hoveredTipId);
         } else if (!$ele.classList.contains('highlight-mengshou-wrap')) {
-            highlighter.removeClass('highlight-wrap-hover', hoveredTipId);
-            hoveredTipId = null;
+            // highlighter.removeClass('highlight-wrap-hover', hoveredTipId);
+            // hoveredTipId = null;
 
             layer.close(layer_index)
         }
@@ -547,7 +568,7 @@ chrome.storage.sync.get(['setting'], function (item) {
         })
         .on(Highlighter.event.HOVER, ({id}) => {
             // log('hover -', id);
-            highlighter.addClass('highlight-wrap-hover', id);
+            // highlighter.addClass('highlight-wrap-hover', id);
 
             let text = localStorage.getItem(id)
 
