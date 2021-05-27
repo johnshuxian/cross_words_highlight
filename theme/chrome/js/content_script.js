@@ -333,6 +333,11 @@ function dragFunc(id) {
     let beginY;
     let endX;
     let endY;
+    let oldY = localStorage.getItem('johns-menu-top');
+
+    if(oldY){
+        Drag.style.top = oldY
+    }
 
     Drag.onmousedown = function (event) {
         let ev = event || window.event;
@@ -361,6 +366,8 @@ function dragFunc(id) {
         }else{
             isMove = false
         }
+
+        localStorage.setItem('johns-menu-top',Drag.style.top)
     };
 }
 
