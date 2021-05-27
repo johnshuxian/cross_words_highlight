@@ -88,6 +88,8 @@ const store = new (class LocalStore {
 });
 const log = console.log.bind(console, '[highlighter]');
 
+let isMove = false
+
 const createTag = (top, left, id) => {
     const $span = document.createElement('span');
     $span.style.left = `${left - 20}px`;
@@ -327,21 +329,38 @@ function remove(id) {
  */
 function dragFunc(id) {
     let Drag = document.getElementById(id);
+    let beginX;
+    let beginY;
+    let endX;
+    let endY;
+
     Drag.onmousedown = function (event) {
         let ev = event || window.event;
         event.stopPropagation();
         let disX = ev.clientX - Drag.offsetLeft;
         let disY = ev.clientY - Drag.offsetTop;
+
+        beginX = ev.clientX;
+        beginY = ev.clientY;
+
         document.onmousemove = function (event) {
             let ev = event || window.event;
-            Drag.style.left = ev.clientX - disX + "px";
+            // Drag.style.left = ev.clientX - disX + "px";
             Drag.style.top = ev.clientY - disY + "px";
             Drag.style.cursor = "move";
         };
     };
-    Drag.onmouseup = function () {
+    Drag.onmouseup = function (e) {
         document.onmousemove = null;
         this.style.cursor = "default";
+        endX = e.clientX;
+        endY = e.clientY;
+
+        if(Math.abs(endY-beginY) >= 5){
+            isMove = true
+        }else{
+            isMove = false
+        }
     };
 }
 
@@ -351,7 +370,7 @@ function buildButton(left, top) {
 }
 
 function buildAnchor() {
-    $("body").prepend("<div class=\"johns-menu-wrap\">\n" +
+    $("body").prepend("<div id='johns-menu-drag' class=\"johns-menu-wrap\">\n" +
         "        <input type=\"checkbox\" id='john-checkbox' class=\"toggler\">\n" +
         "        <div class=\"hamburger\"><div></div></div>\n" +
         "        <div class=\"johns-menu\" id='johns-ex-navbar'>\n" +
@@ -361,6 +380,8 @@ function buildAnchor() {
         "            </div>\n" +
         "        </div>\n" +
         "    </div>")
+
+    dragFunc('johns-menu-drag')
 }
 
 // auto-highlight selections
@@ -388,6 +409,14 @@ chrome.storage.sync.get(['setting'], function (item) {
 
     document.addEventListener('click', e => {
         const $ele = e.target;
+
+        if ($($ele).parents('.johns-menu-wrap').length !== 0 && isMove) {
+            $("#john-checkbox").click()
+            isMove = false
+            return false
+        }
+
+        isMove = false
 
         // delete highlight
         if ($ele.classList.contains('js-remove-annotation')) {
@@ -462,7 +491,7 @@ chrome.storage.sync.get(['setting'], function (item) {
             $("#johns-editor").remove();
         }
 
-        if($($ele).parents('.johns-menu').length === 0 && $($ele).attr('id') !== 'john-checkbox' && $("#john-checkbox").is(":checked")){
+        if ($($ele).parents('.johns-menu').length === 0 && $($ele).attr('id') !== 'john-checkbox' && $("#john-checkbox").is(":checked")) {
             $("#john-checkbox").click()
         }
     });
@@ -562,9 +591,9 @@ chrome.storage.sync.get(['setting'], function (item) {
                 })
 
                 if (index > 0) {
-                    $("#johns-tags").children("li:eq(" + (index - 1) + ")").after("<li data-left='" + position.left + "' data-top='" + position.top + "'><span></span><a id='" + s.id + "' href=\"javascript:void(0);\" title='" + s.text + "' class='johns-tag-goto'>" + handleText(s.text,20) + "</a></li>")
+                    $("#johns-tags").children("li:eq(" + (index - 1) + ")").after("<li data-left='" + position.left + "' data-top='" + position.top + "'><span></span><a id='" + s.id + "' href=\"javascript:void(0);\" title='" + s.text + "' class='johns-tag-goto'>" + handleText(s.text, 20) + "</a></li>")
                 } else {
-                    $("#johns-tags").prepend("<li data-left='" + position.left + "' data-top='" + position.top + "'><span></span><a id='" + s.id + "' href=\"javascript:void(0);\" title='" + s.text + "' class='johns-tag-goto'>" + handleText(s.text,20) + "</a></li>")
+                    $("#johns-tags").prepend("<li data-left='" + position.left + "' data-top='" + position.top + "'><span></span><a id='" + s.id + "' href=\"javascript:void(0);\" title='" + s.text + "' class='johns-tag-goto'>" + handleText(s.text, 20) + "</a></li>")
                 }
             });
             sources = sources.map(hs => ({hs}));
