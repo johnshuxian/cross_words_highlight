@@ -138,7 +138,7 @@ function createHtml(left, top, id) {
 
     let color = localStorage.getItem(id + '-color') || 'yellow'
 
-    $("#johns-editor span."+color).addClass('active')
+    $("#johns-editor span." + color).addClass('active')
 }
 
 /**
@@ -208,6 +208,8 @@ function restore() {
     chrome.storage.local.get([bg_key], function (res) {
         if (res[bg_key]) {
             res[bg_key].forEach(function ({hs}) {
+                localStorage.setItem(hs.id + '-color', hs.color || 'yellow')
+
                 highlighter.fromStore(hs.startMeta, hs.endMeta, hs.text, hs.id, hs.extra)
                 if (hs.comment) {
                     localStorage.setItem(hs.id, hs.comment)
@@ -296,7 +298,7 @@ function contactBackJs(action = 'add', sources) {
                 store.position = position
                 sources[idx] = store
 
-                $("i.highlight-mengshou-wrap[data-highlight-id='" + store.id + "']").attr('class','highlight-mengshou-wrap annotation '+store.color)
+                $("i.highlight-mengshou-wrap[data-highlight-id='" + store.id + "']").attr('class', 'highlight-mengshou-wrap annotation ' + store.color)
             })
 
             info.sources = sources;
