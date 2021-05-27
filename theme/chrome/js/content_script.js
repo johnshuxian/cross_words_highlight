@@ -205,6 +205,19 @@ function restore() {
 
     store.removeAll()
 
+    let need_rem = []
+
+    for (let i = 0; i < localStorage.length; i++) {
+        let key = localStorage.key(i); //获取本地存储的Key
+        if(/^(\w+-){4}\w+(|-color)$/.test(key)){
+            need_rem.push(key);
+        }
+    }
+
+    need_rem.forEach(function (key){
+        localStorage.removeItem(key)
+    })
+
     chrome.storage.local.get([bg_key], function (res) {
         if (res[bg_key]) {
             res[bg_key].forEach(function ({hs}) {
