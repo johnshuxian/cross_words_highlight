@@ -1,5 +1,29 @@
 let bg_key
 
+function htmlspecialchars(str) {
+    let s = "";
+    if (str.length === 0) return "";
+    for   (let i=0; i<str.length; i++)
+    {
+        switch (str.substr(i,1))
+        {
+            case "<": s += "&lt;"; break;
+            case ">": s += "&gt;"; break;
+            case "&": s += "&amp;"; break;
+            case " ":
+                if(str.substr(i + 1, 1) === " "){
+                    s += " &nbsp;";
+                    i++;
+                } else s += " ";
+                break;
+            case "\"": s += "&quot;"; break;
+            case "\n": s += "<br>"; break;
+            default: s += str.substr(i,1); break;
+        }
+    }
+    return s;
+}
+
 function getSelectedText() {
     let t = "";
     window.getSelection ? t = window.getSelection() : document.getSelection ? t = document.getSelection() : document.selection && (t = document.selection.createRange().text)
@@ -157,6 +181,7 @@ function goto(id) {
 }
 
 function handleText(text, len) {
+    text = htmlspecialchars(text)
     let length = text.length
 
     if (length <= len) {
