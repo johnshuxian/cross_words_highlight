@@ -1,3 +1,5 @@
+let bg_key
+
 function getSelectedText() {
     let t = "";
     window.getSelection ? t = window.getSelection() : document.getSelection ? t = document.getSelection() : document.selection && (t = document.selection.createRange().text)
@@ -201,7 +203,7 @@ function mySort(a, b) {
  */
 
 function restore() {
-    let bg_key = store.key + '-' + location.href
+    bg_key = store.key + '-' + location.href.replace(location.hash,'')
 
     store.removeAll()
 
@@ -266,7 +268,7 @@ function getIds(selected) {
 
 function contactBackJs(action = 'add', sources) {
     let info = {
-        href: location.href,
+        href: location.href.replace(location.hash,''),
         host: location.host,
         title: document.title,
     };
@@ -399,6 +401,7 @@ function buildButton(left, top) {
 }
 
 function buildAnchor() {
+    $("#johns-menu-drag").remove()
     $("body").prepend("<div id='johns-menu-drag' class=\"johns-menu-wrap\">\n" +
         "        <input type=\"checkbox\" id='john-checkbox' class=\"toggler\">\n" +
         "        <div class=\"hamburger\"><div></div></div>\n" +
@@ -433,7 +436,7 @@ chrome.storage.sync.get(['setting'], function (item) {
 
     highlighter = new Highlighter({
         wrapTag: 'i',
-        exceptSelectors: ['.my-remove-tip', 'pre', 'code']
+        exceptSelectors: []
     });
 
     document.addEventListener('click', e => {
