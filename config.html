@@ -6,276 +6,155 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Cross Words Highlight</title>
-    <link rel="stylesheet" href="theme/chrome/css/element-ui-index.css">
     <link rel="stylesheet" href="theme/chrome/css/config-page.css">
-    <script src="theme/chrome/js/vue.js"></script>
-    <script src="theme/chrome/js/element-ui-index.js"></script>
-    <script src="theme/chrome/js/config.js"></script>
+    <script src="theme/chrome/js/config.js" defer></script>
 </head>
 <body>
 <div id="app">
-    <template>
-        <div class="config-shell">
-            <header class="config-topbar">
-                <div class="config-topbar-copy">
-                    <h1 class="config-topbar-title">{{ uiText.pageTitle }}</h1>
+    <div class="config-shell">
+        <header class="config-topbar" id="config-topbar">
+            <div class="config-topbar-copy" id="page-title-wrap" hidden>
+                <h1 class="config-topbar-title" id="page-title"></h1>
+            </div>
+
+            <label class="field-shell table-search" for="search-input">
+                <span class="field-icon" aria-hidden="true"></span>
+                <input id="search-input" class="field-input" type="search" autocomplete="off">
+                <button id="search-clear" class="field-clear" type="button">×</button>
+            </label>
+        </header>
+
+        <section class="panel-card panel-card-library">
+            <div class="panel-card-header">
+                <div>
+                    <h2 class="panel-card-title" id="library-title"></h2>
                 </div>
 
-                <el-input
-                        v-model="search"
-                        class="table-search"
-                        clearable
-                        prefix-icon="el-icon-search"
-                        :placeholder="uiText.searchPlaceholder">
-                </el-input>
-            </header>
-
-            <section class="panel-card panel-card-library">
-                <div class="panel-card-header">
-                    <div>
-                        <h2 class="panel-card-title">{{ uiText.libraryTitle }}</h2>
-                    </div>
-                </div>
-
-                <el-table
-                        class="config-table"
-                        :data="tableData"
-                        :height="tableHeight"
-                        :default-sort="{prop: 'readDate', order: 'descending'}"
-                        :empty-text="uiText.emptyState"
-                        @sort-change="changeSort"
-                        v-loading="loading">
-                    <el-table-column
-                            :label="uiText.sourceColumn"
-                            :min-width="pageMode === 'popup' ? 430 : 620">
-                        <template slot-scope="scope">
-                            <div class="source-cell">
-                                <el-avatar
-                                        class="source-avatar"
-                                        size="large"
-                                        :title="scope.row.href"
-                                        @error="errorHandler"
-                                        :key="scope.row.key"
-                                        shape="square"
-                                        fit="scale-down"
-                                        :src="scope.row.icon">
-                                    {{ getHostInitial(scope.row.href) }}
-                                </el-avatar>
-                                <div class="source-copy">
-                                    <div class="source-title">{{ scope.row.title || getReadableHost(scope.row.href) }}</div>
-                                    <div class="source-meta-line">
-                                        <span class="source-host">{{ getReadableHost(scope.row.href) }}</span>
-                                        <span class="source-meta-group">
-                                            <span class="source-meta-chip">
-                                                {{ uiText.highlightMetaLabel }} {{ scope.row.nums }}
-                                            </span>
-                                            <span class="source-meta-chip">
-                                                {{ uiText.noteMetaLabel }} {{ scope.row.commentNums }}
-                                            </span>
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </template>
-                    </el-table-column>
-
-                    <el-table-column
-                            prop="readDate"
-                            sortable="custom"
-                            :width="pageMode === 'popup' ? 124 : 180"
-                            :label="uiText.savedAtColumn">
-                        <template slot-scope="scope">
-                            <span class="timestamp-text">{{ formatReadDate(scope.row.readDate) }}</span>
-                        </template>
-                    </el-table-column>
-
-                    <el-table-column
-                            :label="uiText.actionsColumn"
-                            :width="pageMode === 'popup' ? 138 : 210"
-                            align="right">
-                        <template slot-scope="scope">
-                            <div class="action-group">
-                                <el-button @click="openUrl(scope.row.href)" type="text" size="small">
-                                    {{ uiText.readAction }}
-                                </el-button>
-                                <el-button @click="getDetail(scope.row)" type="text" size="small">
-                                    {{ uiText.detailAction }}
-                                </el-button>
-                                <el-button @click="del(scope.row)" class="is-danger" type="text" size="small">
-                                    {{ uiText.deleteAction }}
-                                </el-button>
-                            </div>
-                        </template>
-                    </el-table-column>
-                </el-table>
-
-                <div v-if="shouldShowBottomBar"
-                     class="panel-card-footer"
-                     :class="{ 'panel-card-footer-with-dock': pageMode === 'popup' }">
-                    <div v-if="pageMode === 'popup'" class="config-dock config-dock-inline">
-                        <div class="dock-control dock-language" :title="uiText.languageLabel">
-                            <button type="button"
-                                    :class="{ 'is-active': uiLanguage === 'zh' }"
-                                    @click="changeLanguage('zh')">
-                                中
-                            </button>
-                            <button type="button"
-                                    :class="{ 'is-active': uiLanguage === 'en' }"
-                                    @click="changeLanguage('en')">
-                                EN
-                            </button>
-                        </div>
-
-                        <div class="dock-control dock-switch" :title="uiText.extensionStatusLabel">
-                            <span class="dock-status-dot" :class="{ 'is-active': extensionSettings.use }"></span>
-                            <el-switch
-                                    v-model="extensionSettings.use"
-                                    @change="statusChange">
-                            </el-switch>
-                        </div>
-                    </div>
-
-                    <el-pagination
-                            v-if="shouldShowPaginationFooter"
-                            class="config-pagination"
-                            :small="pageMode === 'popup'"
-                            @next-click="handleNextClick"
-                            @prev-click="handlePrevClick"
-                            @size-change="handleSizeChange"
-                            @current-change="handleCurrentChange"
-                            :current-page="currentPage"
-                            :page-sizes="paginationPageSizes"
-                            :page-size="pageSize"
-                            :layout="paginationLayout"
-                            :total="tableDataLength">
-                    </el-pagination>
-                </div>
-            </section>
-
-            <div v-if="pageMode !== 'popup'" class="config-dock">
-                <div class="dock-control dock-language" :title="uiText.languageLabel">
-                    <button type="button"
-                            :class="{ 'is-active': uiLanguage === 'zh' }"
-                            @click="changeLanguage('zh')">
-                        中
-                    </button>
-                    <button type="button"
-                            :class="{ 'is-active': uiLanguage === 'en' }"
-                            @click="changeLanguage('en')">
-                        EN
-                    </button>
-                </div>
-
-                <div class="dock-control dock-switch" :title="uiText.extensionStatusLabel">
-                    <span class="dock-status-dot" :class="{ 'is-active': extensionSettings.use }"></span>
-                    <el-switch
-                            v-model="extensionSettings.use"
-                            @change="statusChange">
-                    </el-switch>
+                <div class="header-actions" id="header-transfer-control">
+                    <button type="button" class="header-action-button" data-role="export-button"></button>
+                    <button type="button" class="header-action-button" data-role="import-button"></button>
                 </div>
             </div>
 
-            <el-dialog
-                    custom-class="detail-dialog"
-                    :title="uiText.detailDialogTitle"
-                    :width="pageMode === 'popup' ? '96%' : '92%'"
-                    top="5vh"
-                    :close-on-click-modal="false"
-                    :visible.sync="dialogTableVisible"
-                    @close="closeDialog">
-                <div class="detail-toolbar">
-                    <div>
-                        <h3>{{ activeDetailTitle || uiText.detailDialogTitle }}</h3>
-                        <p>{{ activeDetailHref }}</p>
+            <div class="table-frame" id="table-frame">
+                <table class="config-table" id="config-table">
+                    <thead>
+                    <tr>
+                        <th class="col-source" id="source-header"></th>
+                        <th class="col-readdate">
+                            <button class="sort-button" id="saved-at-sort" type="button">
+                                <span id="saved-at-label"></span>
+                                <span class="sort-indicator" id="saved-at-sort-indicator"></span>
+                            </button>
+                        </th>
+                        <th class="col-actions" id="actions-header"></th>
+                    </tr>
+                    </thead>
+                    <tbody id="table-body"></tbody>
+                </table>
+
+                <div class="empty-state" id="table-empty"></div>
+            </div>
+
+            <div class="panel-card-footer" id="panel-footer">
+                <div class="config-dock config-dock-inline" id="inline-dock">
+                    <div class="dock-control dock-language" id="inline-language-control">
+                        <button type="button" data-language="zh">中</button>
+                        <button type="button" data-language="en">EN</button>
                     </div>
 
-                    <el-input
-                            v-model="detailSearch"
-                            class="detail-search"
-                            clearable
-                            prefix-icon="el-icon-search"
-                            :placeholder="uiText.detailSearchPlaceholder">
-                    </el-input>
-                </div>
-
-                <el-table
-                        class="config-table"
-                        :border="false"
-                        :data="filteredGridData"
-                        :empty-text="uiText.detailEmptyState"
-                        :row-class-name="tableRowClassName"
-                        :max-height="pageMode === 'popup' ? 420 : 520">
-                    <el-table-column
-                            :show-overflow-tooltip="true"
-                            :min-width="pageMode === 'popup' ? 210 : 300"
-                            :label="uiText.excerptColumn">
-                        <template slot-scope="scope">
-                            <el-button type="text"
-                                       class="detail-excerpt"
-                                       :title="scope.row.text"
-                                       @click="open(scope.row.text)">
-                                <span class="detail-text-clamp">{{ scope.row.text }}</span>
-                            </el-button>
-                        </template>
-                    </el-table-column>
-
-                    <el-table-column
-                            :show-overflow-tooltip="true"
-                            :min-width="pageMode === 'popup' ? 150 : 240"
-                            :label="uiText.noteColumn">
-                        <template slot-scope="scope">
-                            <div class="detail-comment-cell" @dblclick.stop="startCommentEdit(scope.row)">
-                                <el-input
-                                        v-if="editingCommentId === scope.row.id"
-                                        v-model="editingCommentDraft"
-                                        ref="detailCommentEditor"
-                                        type="textarea"
-                                        :autosize="{ minRows: 2, maxRows: 4 }"
-                                        class="detail-comment-editor"
-                                        :disabled="savingCommentId === scope.row.id"
-                                        :placeholder="uiText.noteEditorPlaceholder"
-                                        @blur="saveCommentEdit(scope.row)"
-                                        @keydown.native.esc.stop.prevent="cancelCommentEdit">
-                                </el-input>
-                                <span v-else
-                                      class="detail-comment-view"
-                                      :title="scope.row.comment || uiText.noNoteText"
-                                      :class="{ 'is-empty': !scope.row.comment }"
-                                      >
-                                    {{ scope.row.comment || uiText.noNoteText }}
-                                </span>
-                            </div>
-                        </template>
-                    </el-table-column>
-
-                    <el-table-column
-                            :width="pageMode === 'popup' ? 52 : 70"
-                            :label="uiText.colorColumn">
-                        <template slot-scope="scope">
-                            <span class="detail-color-chip">
-                                <span class="detail-color-dot" :style="{ background: getHighlightColorHex(scope.row.color) }"></span>
+                    <label class="dock-control dock-switch" id="inline-switch-control">
+                        <span class="dock-status-dot"></span>
+                        <span class="switch-shell">
+                            <input class="switch-input" type="checkbox" data-role="extension-switch">
+                            <span class="switch-track">
+                                <span class="switch-thumb"></span>
                             </span>
-                        </template>
-                    </el-table-column>
-
-                    <el-table-column
-                            align="right"
-                            :width="pageMode === 'popup' ? 78 : 120"
-                            :label="uiText.actionsColumn">
-                        <template slot-scope="scope">
-                            <el-button type="text" class="is-danger" @click="delDetail(scope.row)" size="small">
-                                {{ uiText.deleteAction }}
-                            </el-button>
-                        </template>
-                    </el-table-column>
-                </el-table>
-
-                <div slot="footer" class="dialog-footer">
-                    <el-button @click="dialogTableVisible = false">{{ uiText.closeAction }}</el-button>
+                        </span>
+                    </label>
                 </div>
-            </el-dialog>
+
+                <div class="pagination-group" id="pagination-group">
+                    <span class="pagination-total" id="pagination-total"></span>
+
+                    <label class="page-size-box" for="page-size-select">
+                        <select class="page-size-select" id="page-size-select"></select>
+                    </label>
+
+                    <div class="pagination-nav">
+                        <button class="pagination-arrow" id="prev-page-button" type="button">‹</button>
+                        <div class="page-number-list" id="page-number-list"></div>
+                        <button class="pagination-arrow" id="next-page-button" type="button">›</button>
+                    </div>
+
+                    <form class="pagination-jumper" id="pagination-jumper-form">
+                        <span id="pagination-jumper-prefix"></span>
+                        <input class="pagination-jumper-input" id="pagination-jumper-input" type="number" min="1" step="1">
+                        <span id="pagination-jumper-suffix"></span>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <div class="config-dock" id="page-dock">
+            <div class="dock-control dock-language" id="page-language-control">
+                <button type="button" data-language="zh">中</button>
+                <button type="button" data-language="en">EN</button>
+            </div>
+
+            <label class="dock-control dock-switch" id="page-switch-control">
+                <span class="dock-status-dot"></span>
+                <span class="switch-shell">
+                    <input class="switch-input" type="checkbox" data-role="extension-switch">
+                    <span class="switch-track">
+                        <span class="switch-thumb"></span>
+                    </span>
+                </span>
+            </label>
         </div>
-    </template>
+    </div>
+
+    <input id="import-file-input" type="file" accept="application/json,.json" hidden>
+    <div class="detail-modal" id="detail-modal" hidden>
+        <div class="detail-dialog" role="dialog" aria-modal="true" aria-labelledby="detail-dialog-title">
+            <button class="dialog-close" id="detail-close-icon" type="button" aria-label="Close">×</button>
+
+            <div class="detail-header">
+                <h2 class="detail-dialog-title" id="detail-dialog-title"></h2>
+                <p class="detail-dialog-link" id="detail-dialog-link"></p>
+            </div>
+
+            <div class="detail-toolbar">
+                <label class="field-shell detail-search" for="detail-search-input">
+                    <span class="field-icon" aria-hidden="true"></span>
+                    <input id="detail-search-input" class="field-input" type="search" autocomplete="off">
+                    <button id="detail-search-clear" class="field-clear" type="button">×</button>
+                </label>
+            </div>
+
+            <div class="detail-table-frame" id="detail-table-frame">
+                <table class="detail-table">
+                    <thead>
+                    <tr>
+                        <th class="detail-col-excerpt" id="detail-excerpt-header"></th>
+                        <th class="detail-col-note" id="detail-note-header"></th>
+                        <th class="detail-col-color" id="detail-color-header"></th>
+                        <th class="detail-col-actions" id="detail-actions-header"></th>
+                    </tr>
+                    </thead>
+                    <tbody id="detail-table-body"></tbody>
+                </table>
+
+                <div class="empty-state" id="detail-empty"></div>
+            </div>
+
+            <div class="dialog-footer">
+                <button class="secondary-button" id="detail-close-button" type="button"></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-stack" id="toast-stack"></div>
 </div>
 </body>
 </html>

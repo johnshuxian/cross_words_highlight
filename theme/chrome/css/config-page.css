@@ -1,7 +1,3 @@
-/*
- * 配置页改成更平、更紧凑的结构。
- * 目标是把可视空间尽量留给已保存页面列表，而不是顶部装饰模块。
- */
 :root {
     --config-bg: #f4f6f8;
     --config-surface: #ffffff;
@@ -22,6 +18,10 @@ body {
     min-height: 100%;
 }
 
+[hidden] {
+    display: none !important;
+}
+
 body {
     margin: 0;
     padding: 12px;
@@ -32,14 +32,14 @@ body {
     font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
+body.modal-open {
+    overflow: hidden;
+}
+
 #app {
     height: 100%;
 }
 
-/*
- * popup 和 options 共用一个 html。
- * popup 必须显式给宽高，不然浏览器会按最小内容宽度压成一条细缝。
- */
 html.page-popup,
 body.page-popup {
     width: 800px;
@@ -78,122 +78,15 @@ body.page-popup .config-shell {
     padding-bottom: 0;
 }
 
-body.page-popup .config-table .el-table__row td {
-    padding-top: 6px;
-    padding-bottom: 6px;
-}
-
-body.page-popup .source-cell {
-    gap: 8px;
-}
-
-body.page-popup .source-avatar {
-    width: 34px;
-    height: 34px;
-}
-
-body.page-popup .source-title {
-    font-size: 13px;
-    line-height: 1.3;
-}
-
-body.page-popup .source-host {
-    font-size: 11px;
-}
-
-body.page-popup .source-meta-line {
-    gap: 6px;
-}
-
-body.page-popup .source-meta-group {
-    gap: 6px;
-    margin-left: 22px;
-}
-
-body.page-popup .source-meta-chip {
-    font-size: 11px;
-}
-
-body.page-popup .timestamp-text {
-    font-size: 11px;
-}
-
-body.page-popup .action-group {
-    gap: 6px;
-}
-
-body.page-popup .action-group .el-button--text {
-    font-size: 12px;
-}
-
-body.page-popup .detail-toolbar {
-    gap: 8px;
-    margin-bottom: 8px;
-}
-
-body.page-popup .detail-toolbar h3 {
-    font-size: 14px;
-}
-
-body.page-popup .detail-toolbar p {
-    font-size: 11px;
-}
-
-body.page-popup .detail-search {
-    width: 170px;
-}
-
-body.page-popup .detail-search .el-input__inner {
-    height: 34px;
-}
-
-body.page-popup .detail-dialog .el-dialog__header {
-    padding: 12px 12px 0;
-}
-
-body.page-popup .detail-dialog .el-dialog__body {
-    padding: 8px 12px 12px;
-}
-
-body.page-popup .detail-dialog .el-dialog__footer {
-    padding: 0 12px 12px;
-}
-
-body.page-popup .detail-excerpt,
-body.page-popup .detail-comment {
-    font-size: 12px;
-    line-height: 1.45;
-}
-
-body.page-popup .detail-comment-view,
-body.page-popup .detail-comment-editor .el-textarea__inner {
-    font-size: 12px;
-    line-height: 1.45;
-}
-
-body.page-popup .detail-color-dot {
-    width: 14px;
-    height: 14px;
-}
-
-body.page-popup .detail-dialog .config-table .el-table__row td {
-    padding-top: 5px;
-    padding-bottom: 5px;
-}
-
-body.page-popup .detail-dialog .el-button--text {
-    font-size: 12px;
-}
-
-/*
- * 顶部只保留标题和搜索。
- * 语言切换、扩展开关都移到底部控制条，避免继续占据首屏高度。
- */
 .config-topbar {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
     gap: 12px;
+}
+
+.config-topbar.is-compact {
+    justify-content: flex-end;
 }
 
 .config-topbar-copy {
@@ -207,11 +100,19 @@ body.page-popup .detail-dialog .el-button--text {
     font-weight: 700;
 }
 
-.config-topbar-description {
-    margin: 6px 0 0;
-    color: var(--config-muted);
-    font-size: 13px;
-    line-height: 1.45;
+.field-shell {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 38px;
+    border: 1px solid var(--config-border);
+    border-radius: 8px;
+    background: #ffffff;
+    box-sizing: border-box;
+}
+
+.field-shell:focus-within {
+    border-color: var(--config-primary);
 }
 
 .table-search {
@@ -219,23 +120,78 @@ body.page-popup .detail-dialog .el-button--text {
     flex: 0 0 auto;
 }
 
-.table-search .el-input__inner,
-.detail-search .el-input__inner {
-    height: 38px;
-    border: 1px solid var(--config-border);
-    border-radius: 8px;
-    background: #ffffff;
+.detail-search {
+    width: 220px;
 }
 
-.table-search .el-input__inner:focus,
-.detail-search .el-input__inner:focus {
-    border-color: var(--config-primary);
+.field-icon {
+    position: relative;
+    flex: 0 0 auto;
+    width: 16px;
+    height: 16px;
+    margin-left: 12px;
 }
 
-/*
- * 主列表卡片占据剩余空间。
- * 用固定高度表格承接内容，避免整页继续出现长滚动。
- */
+.field-icon::before,
+.field-icon::after {
+    content: "";
+    position: absolute;
+    box-sizing: border-box;
+}
+
+.field-icon::before {
+    top: 1px;
+    left: 1px;
+    width: 10px;
+    height: 10px;
+    border: 1.6px solid #9aa5b1;
+    border-radius: 999px;
+}
+
+.field-icon::after {
+    right: 1px;
+    bottom: 1px;
+    width: 6px;
+    height: 1.6px;
+    background: #9aa5b1;
+    transform: rotate(45deg);
+    transform-origin: center;
+}
+
+.field-input {
+    width: 100%;
+    min-width: 0;
+    height: 36px;
+    padding: 0 10px;
+    border: 0;
+    background: transparent;
+    color: var(--config-text);
+    font: inherit;
+    outline: 0;
+}
+
+.field-input::-webkit-search-cancel-button {
+    display: none;
+}
+
+.field-clear {
+    flex: 0 0 auto;
+    width: 22px;
+    height: 22px;
+    margin-right: 10px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: #9aa5b1;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.field-clear:hover {
+    color: var(--config-text);
+}
+
 .panel-card {
     border: 1px solid var(--config-border);
     border-radius: 10px;
@@ -267,82 +223,215 @@ body.page-popup .detail-dialog .el-button--text {
     font-weight: 700;
 }
 
-.panel-card-description {
-    margin: 4px 0 0;
-    color: var(--config-muted);
-    font-size: 12px;
-    line-height: 1.4;
+.header-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex: 0 0 auto;
 }
 
-.config-table {
+.header-action-button {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 56px;
+    height: 30px;
+    padding: 0 12px;
+    border: 1px solid var(--config-border);
+    border-radius: 6px;
+    background: #ffffff;
+    color: var(--config-muted);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.header-action-button:hover {
+    border-color: var(--config-primary);
+    color: var(--config-primary);
+}
+
+.table-frame,
+.detail-table-frame {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
     border: 1px solid var(--config-border);
     border-radius: 8px;
-    overflow: hidden;
+    background: #ffffff;
 }
 
-.config-table::before {
+.detail-table-frame {
+    max-height: 520px;
+}
+
+body.page-popup .detail-table-frame {
+    max-height: 420px;
+}
+
+.table-frame.is-empty .config-table,
+.detail-table-frame.is-empty .detail-table {
     display: none;
 }
 
-.config-table .el-table__header th {
+.empty-state {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    min-height: 180px;
+    padding: 24px;
+    box-sizing: border-box;
+    color: var(--config-muted);
+    font-size: 14px;
+    line-height: 1.6;
+    text-align: center;
+}
+
+.table-frame.is-empty .empty-state,
+.detail-table-frame.is-empty .empty-state {
+    display: flex;
+}
+
+.config-table,
+.detail-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: fixed;
+}
+
+.config-table thead th,
+.detail-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 14px 10px;
     background: #f8fafb;
     color: var(--config-muted);
     font-size: 12px;
     font-weight: 700;
     letter-spacing: 0.04em;
+    text-align: left;
+    border-bottom: 1px solid var(--config-border);
 }
 
-.config-table .el-table__row td {
-    padding-top: 8px;
-    padding-bottom: 8px;
+.config-table tbody td,
+.detail-table tbody td {
+    padding: 10px;
+    border-bottom: 1px solid #eef2f5;
+    vertical-align: middle;
 }
 
-.config-table .el-table__row.success-row > td {
+.config-table tbody tr:nth-child(even) td,
+.detail-table tbody tr:nth-child(even) td {
     background: #fbfcfd;
 }
 
-.config-table .el-table__row:hover > td {
-    background: #f5f8fa !important;
+.config-table tbody tr:hover td,
+.detail-table tbody tr:hover td {
+    background: #f5f8fa;
+}
+
+.col-source {
+    width: auto;
+}
+
+.col-readdate {
+    width: 124px;
+}
+
+.col-actions {
+    width: 138px;
+    text-align: left;
+}
+
+body.page-options .col-readdate {
+    width: 180px;
+}
+
+body.page-options .col-actions {
+    width: 210px;
 }
 
 .source-cell {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
 }
 
 .source-avatar {
+    position: relative;
     flex: 0 0 auto;
-    width: 40px;
-    height: 40px;
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
     background: #eef2f5;
     color: var(--config-text);
     font-weight: 700;
+    overflow: hidden;
+}
+
+body.page-options .source-avatar {
+    width: 40px;
+    height: 40px;
+}
+
+.source-avatar-image,
+.source-avatar-fallback {
+    position: absolute;
+    inset: 0;
+}
+
+.source-avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: none;
+}
+
+.source-avatar.has-image .source-avatar-image {
+    display: block;
+}
+
+.source-avatar-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
 }
 
 .source-copy {
     min-width: 0;
+    flex: 1 1 auto;
 }
 
 .source-title {
     color: var(--config-text);
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
-    line-height: 1.4;
+    line-height: 1.35;
     display: -webkit-box;
     overflow: hidden;
-    text-overflow: ellipsis;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow-wrap: anywhere;
     word-break: break-word;
 }
 
+body.page-options .source-title {
+    font-size: 14px;
+    line-height: 1.4;
+}
+
 .source-meta-line {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 6px;
     margin-top: 4px;
     min-width: 0;
 }
@@ -350,49 +439,81 @@ body.page-popup .detail-dialog .el-button--text {
 .source-host,
 .source-meta-chip {
     color: var(--config-muted);
-    font-size: 12px;
+    font-size: 11px;
     line-height: 1.35;
+}
+
+body.page-options .source-host,
+body.page-options .source-meta-chip {
+    font-size: 12px;
 }
 
 .source-meta-group {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    margin-left: 14px;
-    white-space: nowrap;
-}
-
-.source-meta-chip {
-    display: inline-flex;
-    align-items: center;
+    margin-left: 28px;
     white-space: nowrap;
 }
 
 .timestamp-text {
     color: var(--config-text);
-    font-size: 12px;
+    font-size: 11px;
     font-variant-numeric: tabular-nums;
+}
+
+body.page-options .timestamp-text {
+    font-size: 12px;
+}
+
+.sort-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+.sort-indicator::before {
+    content: "↕";
+    font-size: 11px;
+    color: #9aa5b1;
+}
+
+.sort-button.is-ascending .sort-indicator::before {
+    content: "↑";
+    color: var(--config-primary);
+}
+
+.sort-button.is-descending .sort-indicator::before {
+    content: "↓";
+    color: var(--config-primary);
 }
 
 .action-group {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
-    gap: 10px;
+    justify-content: flex-start;
+    gap: 8px;
     white-space: nowrap;
 }
 
-.action-group .el-button + .el-button {
-    margin-left: 0;
-}
-
-.action-group .el-button--text {
+.action-button {
     padding: 0;
+    border: 0;
+    background: transparent;
     color: var(--config-primary);
+    font: inherit;
+    font-size: 12px;
     font-weight: 600;
+    cursor: pointer;
 }
 
-.action-group .el-button--text.is-danger {
+.action-button.is-danger {
     color: var(--config-danger);
 }
 
@@ -401,73 +522,100 @@ body.page-popup .detail-dialog .el-button--text {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    min-height: 40px;
-    margin-top: 8px;
-    padding-top: 8px;
     gap: 12px;
-    box-sizing: border-box;
-}
-
-.panel-card-footer-with-dock {
-    justify-content: space-between;
-}
-
-.panel-card-footer .el-pagination {
-    flex: 0 0 auto;
-}
-
-.panel-card-footer-with-dock .config-pagination {
-    margin-left: auto;
-}
-
-/*
- * popup 底部分页条里的总数、页大小、页码按钮来自 Element UI 的不同子组件。
- * 默认它们各自使用不同的高度和行高，看起来就会一高一低。
- * 这里统一成同一条 32px 基线，保证“5条/页”和左右页码视觉齐平。
- */
-body.page-popup .panel-card-footer .config-pagination {
-    display: flex;
-    align-items: center;
-    flex-wrap: nowrap;
-    min-height: 32px;
-}
-
-body.page-popup .panel-card-footer .config-pagination .el-pagination__total,
-body.page-popup .panel-card-footer .config-pagination .el-pagination__jump,
-body.page-popup .panel-card-footer .config-pagination .btn-prev,
-body.page-popup .panel-card-footer .config-pagination .btn-next,
-body.page-popup .panel-card-footer .config-pagination .el-pager li {
-    height: 32px;
-    line-height: 32px;
-}
-
-body.page-popup .panel-card-footer .config-pagination .el-pagination__sizes {
-    display: inline-flex;
-    align-items: center;
-    height: 32px;
-    margin-top: 0;
-    margin-bottom: 0;
-}
-
-body.page-popup .panel-card-footer .config-pagination .el-pagination__sizes .el-input__inner {
-    height: 32px;
-    line-height: 32px;
-}
-
-body.page-popup .panel-card-footer .config-pagination .el-pagination__sizes .el-input .el-select__caret {
-    line-height: 32px;
-}
-
-body.page-popup .panel-card-footer {
     min-height: 34px;
     margin-top: 6px;
     padding-top: 6px;
+    box-sizing: border-box;
 }
 
-/*
- * 左下角控制条只保留紧凑交互。
- * 不再展示大段解释文案，只通过 hover title 说明用途。
- */
+.pagination-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 32px;
+    margin-left: auto;
+}
+
+.pagination-total,
+.pagination-jumper,
+.page-ellipsis {
+    color: var(--config-muted);
+    font-size: 12px;
+    line-height: 32px;
+}
+
+.page-size-box {
+    display: inline-flex;
+    align-items: center;
+    height: 32px;
+    border: 1px solid var(--config-border);
+    border-radius: 6px;
+    background: #ffffff;
+    overflow: hidden;
+}
+
+.page-size-select,
+.pagination-jumper-input {
+    height: 32px;
+    border: 0;
+    background: transparent;
+    color: var(--config-text);
+    font: inherit;
+    font-size: 12px;
+    outline: 0;
+}
+
+.page-size-select {
+    min-width: 100px;
+    padding: 0 28px 0 12px;
+}
+
+.pagination-nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.pagination-arrow,
+.page-number-button {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--config-muted);
+    font: inherit;
+    font-size: 12px;
+    line-height: 32px;
+    cursor: pointer;
+}
+
+.page-number-button.is-active {
+    color: var(--config-primary);
+    font-weight: 700;
+}
+
+.pagination-arrow:disabled {
+    cursor: default;
+    opacity: 0.35;
+}
+
+.pagination-jumper {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.pagination-jumper-input {
+    width: 54px;
+    padding: 0 8px;
+    border: 1px solid var(--config-border);
+    border-radius: 6px;
+    background: #ffffff;
+}
+
 .config-dock {
     position: fixed;
     left: 12px;
@@ -488,38 +636,17 @@ body.page-popup .panel-card-footer {
 .dock-control {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
-    min-height: 40px;
-    padding: 4px;
+    min-width: 88px;
+    width: 88px;
+    height: 36px;
+    padding: 3px 8px;
     border: 1px solid var(--config-border);
     border-radius: 8px;
     background: #ffffff;
     box-shadow: var(--config-shadow);
     box-sizing: border-box;
-}
-
-body.page-popup .config-dock-inline .dock-control {
-    width: 88px;
-    min-width: 88px;
-    height: 36px;
-    min-height: 36px;
-    justify-content: center;
-    padding: 3px 8px;
-}
-
-body.page-popup .config-dock-inline .dock-language {
-    gap: 4px;
-}
-
-body.page-popup .config-dock-inline .dock-language button {
-    width: 34px;
-    min-width: 34px;
-    height: 28px;
-}
-
-body.page-popup .config-dock-inline .dock-switch {
-    gap: 8px;
-    padding: 0 8px;
 }
 
 .dock-language {
@@ -531,14 +658,14 @@ body.page-popup .config-dock-inline .dock-switch {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 38px;
-    min-width: 38px;
-    height: 30px;
+    width: 34px;
+    min-width: 34px;
+    height: 28px;
     border: 0;
     border-radius: 6px;
     background: transparent;
     color: var(--config-muted);
-    font-family: inherit;
+    font: inherit;
     font-size: 12px;
     font-weight: 700;
     line-height: 1;
@@ -551,13 +678,7 @@ body.page-popup .config-dock-inline .dock-switch {
 }
 
 .dock-switch {
-    min-width: 72px;
-    justify-content: center;
-    padding: 0 12px;
-}
-
-.dock-switch .el-switch {
-    flex: 0 0 auto;
+    gap: 8px;
 }
 
 .dock-status-dot {
@@ -571,25 +692,104 @@ body.page-popup .config-dock-inline .dock-switch {
     background: var(--config-primary);
 }
 
-/*
- * 详情弹窗继续保留，但视觉也收平。
- * 颜色列只显示色块，不再显示颜色名。
- */
-.detail-toolbar {
+.switch-shell {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.switch-input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.switch-track {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    width: 36px;
+    height: 20px;
+    border-radius: 999px;
+    background: #d1dae3;
+    transition: background-color 0.16s ease;
+}
+
+.switch-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 999px;
+    background: #ffffff;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.16);
+    transition: transform 0.16s ease;
+}
+
+.switch-input:checked + .switch-track {
+    background: var(--config-primary);
+}
+
+.switch-input:checked + .switch-track .switch-thumb {
+    transform: translateX(16px);
+}
+
+.detail-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
     display: flex;
     align-items: flex-start;
-    justify-content: space-between;
+    justify-content: center;
+    padding: 5vh 16px 16px;
+    box-sizing: border-box;
+    background: rgba(15, 23, 42, 0.34);
+}
+
+.detail-dialog {
+    width: min(92vw, 1080px);
+    max-height: calc(100vh - 64px);
+    display: flex;
+    flex-direction: column;
     gap: 12px;
-    margin-bottom: 12px;
+    padding: 16px 18px 18px;
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+    box-sizing: border-box;
 }
 
-.detail-toolbar h3 {
+body.page-popup .detail-dialog {
+    width: min(96vw, 760px);
+}
+
+.dialog-close {
+    align-self: flex-end;
+    width: 28px;
+    height: 28px;
+    margin: -4px -4px -8px 0;
+    border: 0;
+    background: transparent;
+    color: #7b8794;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.detail-header {
+    min-width: 0;
+}
+
+.detail-dialog-title {
     margin: 0 0 4px;
-    font-size: 16px;
+    color: var(--config-text);
+    font-size: 18px;
     line-height: 1.2;
+    font-weight: 700;
 }
 
-.detail-toolbar p {
+.detail-dialog-link {
     margin: 0;
     color: var(--config-muted);
     font-size: 12px;
@@ -597,20 +797,58 @@ body.page-popup .config-dock-inline .dock-switch {
     word-break: break-all;
 }
 
-.detail-search {
+.detail-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.detail-col-excerpt {
+    width: auto;
+}
+
+.detail-col-note {
     width: 220px;
 }
 
-.detail-excerpt,
-.detail-comment {
+.detail-col-color {
+    width: 70px;
+    text-align: center;
+}
+
+.detail-col-actions {
+    width: 78px;
+    text-align: left;
+}
+
+.detail-table .detail-col-actions .action-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+body.page-popup .detail-col-note {
+    width: 150px;
+}
+
+body.page-popup .detail-col-color {
+    width: 52px;
+}
+
+.detail-excerpt {
     display: inline-flex;
     align-items: center;
     width: 100%;
     padding: 0;
+    border: 0;
+    background: transparent;
     color: var(--config-text);
+    font: inherit;
     font-size: 13px;
     line-height: 1.55;
     text-align: left;
+    cursor: pointer;
 }
 
 .detail-text-clamp,
@@ -626,14 +864,6 @@ body.page-popup .config-dock-inline .dock-switch {
     text-overflow: ellipsis;
 }
 
-.detail-dialog .config-table .el-table__body td {
-    vertical-align: middle;
-}
-
-.detail-comment.is-empty {
-    color: var(--config-muted);
-}
-
 .detail-comment-cell {
     display: flex;
     align-items: center;
@@ -643,7 +873,6 @@ body.page-popup .config-dock-inline .dock-switch {
 }
 
 .detail-comment-view {
-    width: 100%;
     color: var(--config-text);
     font-size: 13px;
     line-height: 1.55;
@@ -654,22 +883,23 @@ body.page-popup .config-dock-inline .dock-switch {
     color: var(--config-muted);
 }
 
-.detail-comment-editor {
+.detail-comment-editor-textarea {
     width: 100%;
-}
-
-.detail-comment-editor .el-textarea__inner {
-    min-height: 58px !important;
+    min-height: 58px;
     padding: 6px 8px;
     border: 1px solid var(--config-border);
     border-radius: 6px;
+    background: #ffffff;
     color: var(--config-text);
+    font: inherit;
     font-size: 13px;
     line-height: 1.45;
     resize: vertical;
+    outline: 0;
+    box-sizing: border-box;
 }
 
-.detail-comment-editor .el-textarea__inner:focus {
+.detail-comment-editor-textarea:focus {
     border-color: var(--config-primary);
 }
 
@@ -680,6 +910,18 @@ body.page-popup .config-dock-inline .dock-switch {
     width: 100%;
 }
 
+/**
+ * 颜色列只放一个小色块。
+ * 这里把表头和内容都按同一条中线对齐，避免表头左对齐、
+ * 内容居中时看起来整列发飘。
+ */
+.detail-table thead .detail-col-color,
+.detail-table tbody .detail-col-color {
+    padding-left: 6px;
+    padding-right: 6px;
+    text-align: center;
+}
+
 .detail-color-dot {
     width: 16px;
     height: 16px;
@@ -687,61 +929,62 @@ body.page-popup .config-dock-inline .dock-switch {
     border: 1px solid rgba(15, 23, 42, 0.08);
 }
 
-.detail-dialog {
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+body.page-popup .detail-color-dot {
+    width: 14px;
+    height: 14px;
 }
 
-.detail-dialog .el-dialog__header {
-    padding: 16px 18px 0;
+.dialog-footer {
+    display: flex;
+    justify-content: flex-end;
 }
 
-.detail-dialog .el-dialog__title {
-    color: var(--config-text);
-    font-size: 18px;
-    font-weight: 700;
-}
-
-.detail-dialog .el-dialog__body {
-    padding: 10px 18px 18px;
-}
-
-.detail-dialog .el-dialog__footer {
-    padding: 0 18px 18px;
-}
-
-/*
- * Element UI 组件只做最少量主题化。
- * 控件边框统一，避免继续出现高饱和渐变组件。
- */
-.config-shell .el-switch__label {
-    display: none;
-}
-
-.config-shell .el-switch__core {
-    border-color: var(--config-border-strong);
-}
-
-.config-shell .el-switch.is-checked .el-switch__core {
-    border-color: var(--config-primary);
-    background-color: var(--config-primary);
-}
-
-.config-shell .el-button--primary {
-    border-color: var(--config-primary);
-    background: var(--config-primary);
-}
-
-.config-shell .el-button--primary:hover,
-.config-shell .el-button--primary:focus {
-    border-color: var(--config-primary);
-    background: var(--config-primary);
-}
-
-.config-shell .el-button:not(.el-button--text),
-.detail-dialog .el-button:not(.el-button--text) {
+.secondary-button {
+    min-width: 80px;
+    height: 36px;
+    padding: 0 14px;
+    border: 1px solid var(--config-border);
     border-radius: 6px;
+    background: #ffffff;
+    color: var(--config-text);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.toast-stack {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    z-index: 70;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.toast-item {
+    min-width: 180px;
+    max-width: 300px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: var(--config-primary);
+    color: #ffffff;
+    font-size: 13px;
+    line-height: 1.5;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.16s ease, transform 0.16s ease;
+}
+
+.toast-item.is-error {
+    background: var(--config-danger);
+}
+
+.toast-item.is-visible {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 @media (max-width: 900px) {
@@ -754,8 +997,7 @@ body.page-popup .config-dock-inline .dock-switch {
         padding-bottom: 50px;
     }
 
-    .config-topbar,
-    .detail-toolbar {
+    .config-topbar {
         flex-direction: column;
         align-items: stretch;
     }
@@ -767,7 +1009,9 @@ body.page-popup .config-dock-inline .dock-switch {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .dock-language button {
+    .switch-track,
+    .switch-thumb,
+    .toast-item {
         transition: none;
     }
 }

@@ -38,6 +38,8 @@ const DEFAULT_UI_LANGUAGE = 'zh';
 const FLOATING_BUTTON_ESTIMATED_WIDTH = 72;
 const FLOATING_BUTTON_OFFSET_Y = 10;
 const FLOATING_BUTTON_EDGE_GAP = 12;
+const MENU_TOGGLE_SIZE = 56;
+const MENU_TOP_EDGE_GAP = 12;
 const EDITOR_PANEL_WIDTH = 220;
 const EDITOR_PANEL_ESTIMATED_HEIGHT = 228;
 const EDITOR_PANEL_OFFSET_Y = 12;
@@ -100,6 +102,16 @@ const COLOR_PICKER_OPTIONS = [
     {value: 'mint', title: {zh: '薄荷', en: 'Fresh Mint'}},
     {value: 'pearl', title: {zh: '珍珠灰', en: 'Soft Pearl'}}
 ];
+const SIDEBAR_MARKER_COLOR_MAP = {
+    yellow: '#f8d66d',
+    green: '#bee7a5',
+    pink: '#f6a6c1',
+    blue: '#9eddf8',
+    orange: '#fdba74',
+    purple: '#c4b5fd',
+    mint: '#99f6e4',
+    pearl: '#e2e8f0'
+};
 
 /**
  * 运行时缓存只保存在 content script 内存里。
@@ -1073,6 +1085,22 @@ function getHighlightColor(id) {
 }
 
 /**
+ * 左侧目录前面的圆点直接使用当前高亮颜色。
+ * 这里单独把颜色值映射成稳定的十六进制，避免依赖页面里的 class 样式去猜颜色。
+ * @param id
+ * @returns {string}
+ */
+function getAnchorMarkerColor(id) {
+    const color = getHighlightColor(id)
+
+    if (!SIDEBAR_MARKER_COLOR_MAP[color]) {
+        return SIDEBAR_MARKER_COLOR_MAP[DEFAULT_HIGHLIGHT_COLOR]
+    }
+
+    return SIDEBAR_MARKER_COLOR_MAP[color]
+}
+
+/**
  * 删除单条高亮的全部运行时状态。
  * @param id
  */
@@ -1382,10 +1410,33 @@ function runPendingRestore() {
 function restoreMenuTop() {
     return new Promise(function (resolve) {
         chrome.storage.local.get([MENU_POSITION_STORAGE_KEY], function (res) {
-            runtimeStore.menuTop = typeof res[MENU_POSITION_STORAGE_KEY] === 'string' ? res[MENU_POSITION_STORAGE_KEY] : ''
+            runtimeStore.menuTop = normalizeMenuTop(res[MENU_POSITION_STORAGE_KEY])
             resolve(runtimeStore.menuTop)
         })
     })
+}
+
+/**
+ * 菜单按钮只允许在当前视口内上下拖动。
+ * 旧版本直接保存原始 top，页面高度一变就可能把按钮恢复到屏幕外。
+ * @param top
+ * @returns {string}
+ */
+function normalizeMenuTop(top) {
+    if (typeof top !== 'string' || !top.trim()) {
+        return ''
+    }
+
+    const numericTop = parseFloat(top)
+
+    if (!Number.isFinite(numericTop)) {
+        return ''
+    }
+
+    const maxTop = Math.max(MENU_TOP_EDGE_GAP, window.innerHeight - MENU_TOGGLE_SIZE - MENU_TOP_EDGE_GAP)
+    const nextTop = clampNumber(numericTop, MENU_TOP_EDGE_GAP, maxTop)
+
+    return nextTop + 'px'
 }
 
 /**
@@ -1393,7 +1444,7 @@ function restoreMenuTop() {
  * @param top
  */
 function saveMenuTop(top) {
-    runtimeStore.menuTop = top || ''
+    runtimeStore.menuTop = normalizeMenuTop(top)
     chrome.storage.local.set({[MENU_POSITION_STORAGE_KEY]: runtimeStore.menuTop}, function () {
     })
 }
@@ -1759,6 +1810,7 @@ function handleText(text, len) {
  */
 function createAnchorItemHtml(id, text, left, top) {
     const comment = getHighlightComment(id)
+    const markerColor = getAnchorMarkerColor(id)
     let noteHtml = ''
 
     if (comment) {
@@ -1766,7 +1818,7 @@ function createAnchorItemHtml(id, text, left, top) {
     }
 
     return "<li data-highlight-id='" + id + "' data-left='" + left + "' data-top='" + top + "'>" +
-        "<span></span>" +
+        "<span class='johns-tag-marker' style='background:" + markerColor + ";'></span>" +
         "<div class='johns-tag-row'>" +
         "<a id='" + id + "' href=\"javascript:void(0);\" title='" + text + "' class='johns-tag-goto'>" +
         "<span class='johns-tag-text'>" + handleText(text, 28) + "</span>" +
@@ -2009,6 +2061,7 @@ function dragFunc(id) {
     restoreMenuTop().then(function (oldY) {
         if (oldY) {
             Drag.style.top = oldY
+            Drag.style.bottom = 'auto'
         }
     })
 
@@ -2024,7 +2077,8 @@ function dragFunc(id) {
         document.onmousemove = function (event) {
             let ev = event || window.event;
             // Drag.style.left = ev.clientX - disX + "px";
-            Drag.style.top = ev.clientY - disY + "px";
+            Drag.style.top = normalizeMenuTop((ev.clientY - disY) + "px");
+            Drag.style.bottom = 'auto'
             Drag.style.cursor = "move";
         };
     };
@@ -2052,7 +2106,7 @@ function buildButton(left, top) {
 function buildAnchor() {
     $("#johns-menu-drag").remove()
     $("body").prepend("<div id='johns-menu-drag' class=\"johns-menu-wrap\">\n" +
-        "        <input type=\"checkbox\" id='john-checkbox' class=\"toggler\">\n" +
+        "        <input type=\"checkbox\" id='john-checkbox' class=\"toggler\" autocomplete=\"off\">\n" +
         "        <div class=\"hamburger\"><div></div></div>\n" +
         "        <div class=\"johns-menu\" id='johns-ex-navbar'>\n" +
         "            <div>\n" +
@@ -2062,6 +2116,20 @@ function buildAnchor() {
         "            </div>\n" +
         "        </div>\n" +
         "    </div>")
+
+    /**
+     * 刷新后左下角按钮必须默认处于收起态。
+     * 某些页面会把 checkbox 的旧状态短暂带回来，这里主动重置两次，避免按钮闪一下就消失。
+     */
+    const menuToggle = document.getElementById('john-checkbox')
+
+    if (menuToggle) {
+        menuToggle.checked = false
+
+        requestAnimationFrame(function () {
+            menuToggle.checked = false
+        })
+    }
 
     dragFunc('johns-menu-drag')
 }
@@ -2238,6 +2306,7 @@ chrome.storage.sync.get(['setting', 'uiLanguage'], function (item) {
 
             let color = $($ele).attr('data-color');
             setHighlightColor(id, color)
+            applyHighlightColorClass(id)
 
             $($ele).siblings('.active').removeClass('active')
 
@@ -2246,6 +2315,7 @@ chrome.storage.sync.get(['setting', 'uiLanguage'], function (item) {
             const wrappedSource = getWrappedSource(id)
             contactBackJs('add', wrappedSource)
             persistWrappedSources([wrappedSource])
+            refreshAnchorItemById(id)
 
         } else if (!$ele.classList.contains('highlight-mengshou-wrap')) {
             $("#johns-editor").remove();
