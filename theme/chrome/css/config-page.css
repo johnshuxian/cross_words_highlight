@@ -397,6 +397,14 @@ body.page-options .source-avatar {
     display: block;
 }
 
+/**
+ * 站点图标加载成功后，要把字母兜底完全隐藏。
+ * 不然真实 favicon 和首字母会叠在一起，看起来就像图标中间多了一个字母。
+ */
+.source-avatar.has-image .source-avatar-fallback {
+    display: none;
+}
+
 .source-avatar-fallback {
     display: flex;
     align-items: center;
@@ -696,6 +704,7 @@ body.page-options .timestamp-text {
     position: relative;
     display: inline-flex;
     align-items: center;
+    cursor: pointer;
 }
 
 .switch-input {
@@ -713,6 +722,7 @@ body.page-options .timestamp-text {
     border-radius: 999px;
     background: #d1dae3;
     transition: background-color 0.16s ease;
+    cursor: pointer;
 }
 
 .switch-thumb {
@@ -794,7 +804,9 @@ body.page-popup .detail-dialog {
     color: var(--config-muted);
     font-size: 12px;
     line-height: 1.45;
-    word-break: break-all;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .detail-toolbar {

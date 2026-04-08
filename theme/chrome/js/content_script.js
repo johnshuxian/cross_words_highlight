@@ -487,10 +487,6 @@ function shouldSkipRestoreTextNode(textNode) {
         return true
     }
 
-    if (!textNode.textContent || !textNode.textContent.trim()) {
-        return true
-    }
-
     const parentElement = textNode.parentElement
 
     if (!parentElement) {
@@ -503,6 +499,17 @@ function shouldSkipRestoreTextNode(textNode) {
 
     if (parentElement.closest(RESTORE_UI_EXCLUDE_SELECTOR)) {
         return true
+    }
+
+    /**
+     * 普通正文里纯空白文本节点基本没有恢复价值，直接跳过可以减少噪音。
+     * 但代码块、预格式化文本里的换行和缩进本身就是内容结构的一部分，
+     * 如果这里一刀切跳过，刷新后就很容易出现“高亮文本找不到”的情况。
+     */
+    if (!textNode.textContent || !textNode.textContent.trim()) {
+        if (!parentElement.closest('pre, code')) {
+            return true
+        }
     }
 
     return false
@@ -850,6 +857,16 @@ function collectRestoreCandidateRoots(storedSource, guessedStart, guessedEnd) {
     )
 
     pushRestoreCandidateRoot(candidateRoots, commonAncestor)
+    /**
+     * 代码高亮页常见结构是 pre/code/span 多层嵌套。
+     * 这里把最近的 pre/code 容器也加入候选，避免公共祖先过细时只搜到局部 token。
+     */
+    pushRestoreCandidateRoot(
+        candidateRoots,
+        commonAncestor && commonAncestor.nodeType === Node.ELEMENT_NODE
+            ? commonAncestor.closest('pre, code')
+            : null
+    )
     appendMetaCandidateRoots(candidateRoots, storedSource && storedSource.startMeta)
     appendMetaCandidateRoots(candidateRoots, storedSource && storedSource.endMeta)
     pushRestoreCandidateRoot(candidateRoots, document.body)

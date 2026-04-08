@@ -790,18 +790,19 @@ class ConfigPageApp {
         const title = row.title || this.getReadableHost(row.href)
         const host = this.getReadableHost(row.href)
         const hostInitial = this.getHostInitial(row.href)
+        const avatarCandidateSources = this.getAvatarCandidateSources(row)
         const safeHref = escapeAttribute(row.href)
         const safeKey = escapeAttribute(row.key)
         const safeTitle = escapeHtml(title)
         const safeHost = escapeHtml(host)
-        const safeIcon = row.icon ? escapeAttribute(row.icon) : ''
+        const safeAvatarSources = escapeAttribute(avatarCandidateSources.join('\n'))
 
         return '' +
             '<tr data-href="' + safeHref + '" data-key="' + safeKey + '" data-row-index="' + index + '">' +
             '    <td class="col-source">' +
             '        <div class="source-cell">' +
             '            <span class="source-avatar" data-fallback="' + escapeAttribute(hostInitial) + '">' +
-            (safeIcon ? '                <img class="source-avatar-image" data-src="' + safeIcon + '" alt="">' : '') +
+            (avatarCandidateSources.length ? '                <img class="source-avatar-image" data-src-candidates="' + safeAvatarSources + '" alt="">' : '') +
             '                <span class="source-avatar-fallback">' + escapeHtml(hostInitial) + '</span>' +
             '            </span>' +
             '            <div class="source-copy">' +
@@ -1857,6 +1858,14 @@ class ConfigPageApp {
 
         avatars.forEach(function (image) {
             const wrapper = image.closest('.source-avatar')
+            const candidateSources = String(image.dataset.srcCandidates || '')
+                .split('\n')
+                .map(function (candidate) {
+                    return candidate.trim()
+                })
+                .filter(function (candidate, index, list) {
+                    return candidate && list.indexOf(candidate) === index
+                })
 
             if (!wrapper) {
                 return
@@ -1871,11 +1880,33 @@ class ConfigPageApp {
                 image.removeAttribute('src')
             }
 
-            image.addEventListener('load', applyLoadedState, {once: true})
-            image.addEventListener('error', applyErrorState, {once: true})
+            /**
+             * favicon 读取优先级：
+             * 1. 按 host 固定生成的 /favicon.ico
+             * 2. 页面记录下来的 icon 地址
+             * 3. 最后再回退到字母头像
+             * 每次失败后继续试下一项，不让单个 403 直接把整条记录打回 fallback。
+             */
+            const loadCandidate = function (candidateIndex) {
+                if (candidateIndex >= candidateSources.length) {
+                    applyErrorState()
+                    return
+                }
 
-            if (image.dataset.src) {
-                image.src = image.dataset.src
+                image.onload = function () {
+                    applyLoadedState()
+                }
+
+                image.onerror = function () {
+                    loadCandidate(candidateIndex + 1)
+                }
+
+                image.src = candidateSources[candidateIndex]
+            }
+
+            if (candidateSources.length > 0) {
+                loadCandidate(0)
+                return
             }
 
             if (image.complete) {
@@ -1903,6 +1934,49 @@ class ConfigPageApp {
         } catch (error) {
             return String(url).replace(/^https?:\/\//, '')
         }
+    }
+
+    /**
+     * 优先按 host 生成一个稳定的 favicon 地址。
+     * 这里固定走站点根路径的 /favicon.ico，避免过度依赖页面里临时生成的 icon 链接。
+     * @param url
+     * @returns {string}
+     */
+    getHostFaviconUrl(url) {
+        if (!url) {
+            return ''
+        }
+
+        try {
+            const parsedUrl = new URL(url)
+            return parsedUrl.origin + '/favicon.ico'
+        } catch (error) {
+            return ''
+        }
+    }
+
+    /**
+     * 列表头像按固定顺序准备候选 favicon：
+     * 1. host 对应的 /favicon.ico
+     * 2. 页面保存时记录下来的 icon
+     * 这样即使页面 icon 地址过期，仍然有机会先命中更稳定的主站图标。
+     * @param row
+     * @returns {string[]}
+     */
+    getAvatarCandidateSources(row) {
+        const candidateSources = []
+        const hostFaviconUrl = this.getHostFaviconUrl(row && row.href)
+        const storedIconUrl = row && row.icon ? String(row.icon).trim() : ''
+
+        if (hostFaviconUrl) {
+            candidateSources.push(hostFaviconUrl)
+        }
+
+        if (storedIconUrl && candidateSources.indexOf(storedIconUrl) === -1) {
+            candidateSources.push(storedIconUrl)
+        }
+
+        return candidateSources
     }
 
     /**
