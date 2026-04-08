@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="theme/chrome/css/element-ui-index.css">
+    <!-- 引入组件库 -->
+    <script src="theme/chrome/js/vue.js"></script>
+    <script src="theme/chrome/js/element-ui-index.js"></script>
+    <script src="theme/chrome/js/jquery.js"></script>
+    <script src="theme/chrome/js/config.js"></script>
+</head>
+<style>
+    /*.demo-table-expand {*/
+    /*    font-size: 0;*/
+    /*}*/
+    /*.demo-table-expand label {*/
+    /*    width: 90px;*/
+    /*    color: #99a9bf;*/
+    /*}*/
+    /*.demo-table-expand .el-form-item {*/
+    /*    margin-right: 0;*/
+    /*    margin-bottom: 0;*/
+    /*    width: 50%;*/
+    /*}*/
+
+    body {
+        min-height: 300px;
+        overflow-y: auto;
+    }
+
+    #app {
+        /*display: flex;*/
+        justify-content: center;
+        align-content: center;
+    }
+
+    .el-table .warning-row {
+        background: oldlace;
+    }
+
+    .el-table .success-row {
+        /*background: #f0f9eb;*/
+        background:#F3F9FF
+    }
+
+</style>
+<body>
+<div id="app">
+    <template>
+        <el-dialog @close='closeDialog' :fullscreen="true" :visible.sync="dialogTableVisible">
+            <el-table
+                    :border="true"
+                      :data="gridData.filter(data => !value || data.text.toLowerCase().includes(value.toLowerCase()) || data.comment.toLowerCase().includes(value.toLowerCase()))"
+                      :row-class-name="tableRowClassName"
+                      height="350">
+                <el-table-column :show-overflow-tooltip="true" property="text" label="Contents">
+                    <template slot-scope="scope">
+                        <!-- 新增鼠标移动到名称位置显示全部 -->
+                        <!--                        <el-popover-->
+                        <!--                                placement="top-start"-->
+                        <!--                                width="400"-->
+                        <!--                                trigger="hover">-->
+                        <!--                            <slot>{{scope.row.text}}</slot>-->
+                        <!--                            &lt;!&ndash; 内容和过滤&ndash;&gt;-->
+                        <!--                            <el-button slot="reference" @click="open(scope.row.text)" type="text">{{scope.row.text|ellipsis}}</el-button>-->
+                        <!--                        </el-popover>-->
+                        <el-button type="text" :show-overflow-tooltip="true" @click="open(scope.row.text)">
+                            {{ scope.row.text}}
+                        </el-button>
+                    </template>
+                </el-table-column>
+                <el-table-column :show-overflow-tooltip="true" @click="open" property="comment" label="Comments">
+                    <template slot-scope="scope">
+                        <!--                        <el-popover-->
+                        <!--                                placement="top-start"-->
+                        <!--                                width="200"-->
+                        <!--                                trigger="hover">-->
+                        <!--                            <slot>{{scope.row.comment}}</slot>-->
+                        <!--                            &lt;!&ndash; 内容和过滤&ndash;&gt;-->
+                        <!--                            <el-button slot="reference" @click="open(scope.row.comment)" type="text">{{scope.row.comment|ellipsis}}</el-button>-->
+                        <!--                        </el-popover>-->
+                        <el-button type="text" :show-overflow-tooltip="true" @click="open(scope.row.comment)">
+                            {{ scope.row.comment }}
+                        </el-button>
+                    </template>
+                </el-table-column>
+                <el-table-column
+                        label="操作"
+                        align="center"
+                        width="150"
+                >
+                    <template slot="header" slot-scope="scope">
+                        <el-input
+                                v-model="value"
+                                size="mini"
+                                placeholder="Search"/>
+                    </template>
+                    <template slot-scope="scope">
+                        <!--                        <el-button @click="openUrl(scope.row.href)" type="text" size="small">查看</el-button>-->
+                        <!--                        <el-button  @click="getDetail(scope.row.hs)" type="text" size="small">详情</el-button>-->
+                        <el-button type="text" @click="delDetail(scope.$index,scope.row)" size="small">Delete</el-button>
+                    </template>
+                </el-table-column>
+
+            </el-table>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="dialogTableVisible = false">Close</el-button>
+            </div>
+        </el-dialog>
+        <el-table
+                ref="filterTable"
+                :data="tableData"
+                style="width: 100%;"
+                :default-sort="{prop: 'readDate', order: 'descending'}"
+                @sort-change="changeSort"
+                v-loading="loading"
+                height="500"
+        >
+            <el-table-column
+                    prop="icon"
+                    label="Site"
+            >
+                <template slot-scope="scope">
+                    <!--                    <el-image style="width: 20px" :src="scope.row.icon">-->
+                    <!--                        <div slot="error" class="image-slot">-->
+                    <!--                            <i class="el-icon-picture-outline"></i>-->
+                    <!--                        </div>-->
+                    <!--                    </el-image>-->
+                    <el-avatar size="large" :title="scope.row.href" @error="errorHandler" :key="scope.row.key"
+                               shape="circle" fit="scale-down" :src="scope.row.icon">
+                        {{ scope.row.href.replace(/https?:\/\//, '') }}
+                    </el-avatar>
+                </template>
+            </el-table-column>
+            <el-table-column
+                    prop="title"
+                    label="Title"
+                    :show-overflow-tooltip="true"
+                    min-width="150"
+            >
+            </el-table-column>
+
+            <el-table-column
+                    prop="nums"
+                    sortable="custom"
+                    width="120"
+                    label="Highlights">
+            </el-table-column>
+            <el-table-column
+                    prop="commentNums"
+                    sortable="custom"
+                    width="120"
+                    label="Comments">
+            </el-table-column>
+            <el-table-column
+                    prop="readDate"
+                    label="Read time"
+                    sortable="custom"
+                    width="160"
+
+            >
+            </el-table-column>
+            <el-table-column
+                    label="操作"
+                    align="right"
+                    width="150"
+            >
+                <template slot="header" slot-scope="scope">
+                    <el-input
+                            scope
+                            v-model="search"
+                            size="mini"
+                            placeholder="Search"/>
+                </template>
+                <template slot-scope="scope">
+                    <el-button @click="openUrl(scope.row.href)" type="text" size="small">Read</el-button>
+                    <el-button @click="getDetail(scope.row.hs)" type="text" size="small">Detail</el-button>
+                    <el-button type="text" @click="del(scope.row.key)" size="small">Delete</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+        <el-pagination
+                @next-click="handleNextClick"
+                @prev-click="handlePrevClick"
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+                :current-page="currentPage"
+                :page-sizes="[5, 6, 10, 20, 40]"
+                :page-size="pageSize"
+                layout="total, sizes, prev, pager, next, jumper"
+                style="margin-top: 15px"
+                :total="tableDataLength">
+        </el-pagination>
+        <el-switch
+                style="float: right;display: inline-flex;bottom: 26px;"
+                v-model="extensionSettings.use"
+                @change="statusChange"
+                active-color="#13ce66"
+                inactive-color="#ff4949"
+                active-text="ON"
+                inactive-text="OFF">
+        </el-switch>
+    </template>
+</div>
+</body>
+</html>

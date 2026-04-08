@@ -1,0 +1,50 @@
+{
+   "author": "johns shuxian (1776243356@qq.com)",
+   "background": {
+      "page": "background.html"
+   },
+   "browser_action": {
+      "default_icon": {
+         "128": "ext_icons/icon_128_1.png"
+      },
+      "default_popup": "config.html",
+      "default_title": "划词收藏"
+   },
+   "content_scripts": [ {
+      "js": [
+         "theme/chrome/js/web-highlighter.min.js",
+         "theme/chrome/js/jquery.js",
+         "theme/chrome/js/layer/layer.js",
+         "theme/chrome/js/content_script.js"
+      ],
+      "css": [
+         "theme/chrome/css/css.css",
+         "theme/chrome/js/layer/theme/default/layer.css",
+         "theme/chrome/css/menu.css",
+         "theme/chrome/css/style.css"
+      ],
+      "matches": ["<all_urls>"],
+      "run_at": "document_idle"
+   } ],
+   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+   "description": "划词添加高亮,方便快捷添加批注",
+   "icons": {
+      "128": "ext_icons/icon_128_1.png"
+   },
+   "manifest_version": 2,
+   "name": "Cross Words Highlight 划词高亮",
+   "options_page": "config.html",
+   "permissions": [ "contextMenus","storage","unlimitedStorage","activeTab"],
+   "version": "1.1.3",
+   "web_accessible_resources": [
+      "theme/chrome/css/fonts/icons.woff2",
+      "theme/chrome/css/fonts/icons.eot",
+      "theme/chrome/css/fonts/icons.woff",
+      "theme/chrome/css/fonts/icons.ttf",
+      "theme/chrome/js/layer/theme/default/icon.png",
+      "theme/chrome/js/layer/theme/default/icon-ext.png",
+      "theme/chrome/js/layer/theme/default/loading-0.gif",
+      "theme/chrome/js/layer/theme/default/loading-1.gif",
+      "theme/chrome/js/layer/theme/default/loading-2.gif"
+   ]
+}
