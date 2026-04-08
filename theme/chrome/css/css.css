@@ -1,493 +1,365 @@
-@font-face {
-    font-family: Icons;
-    src: url("chrome-extension://__MSG_@@extension_id__/theme/chrome/css/fonts/icons.eot");
-    src: url("chrome-extension://__MSG_@@extension_id__/theme/chrome/css/fonts/icons.eot") format("embedded-opentype"), url("chrome-extension://__MSG_@@extension_id__/theme/chrome/css/fonts/icons.woff2") format("woff2"), url("chrome-extension://__MSG_@@extension_id__/theme/chrome/css/fonts/icons.woff2") format("woff"), url("chrome-extension://__MSG_@@extension_id__/theme/chrome/css/fonts/icons.ttf") format("truetype"), url("chrome-extension://__MSG_@@extension_id__/theme/chrome/css/fonts/icons.svg") format("svg");
-    font-style: normal;
-    font-weight: 400;
-    font-variant: normal;
-    text-decoration: inherit;
-    text-transform: none
-}
-
-/*i.icon {*/
-/*    display: inline-block;*/
-/*    opacity: 1;*/
-/*    margin: 0 .25rem 0 0;*/
-/*    width: 1.18em;*/
-/*    height: 1em;*/
-/*    font-family: Icons;*/
-/*    font-style: normal;*/
-/*    font-weight: 400;*/
-/*    text-decoration: inherit;*/
-/*    text-align: center;*/
-/*    speak: none;*/
-/*    font-smoothing: antialiased;*/
-/*    -moz-osx-font-smoothing: grayscale;*/
-/*    -webkit-font-smoothing: antialiased;*/
-/*    -webkit-backface-visibility: hidden;*/
-/*    backface-visibility: hidden*/
-/*}*/
-
-/*i.icon:before {*/
-/*    background: none !important*/
-/*}*/
-
-
-
+/*
+ * 高亮主样式文件。
+ * 这里只保留高亮文本、编辑浮层和少量阅读辅助样式，避免继续混入历史遗留规则。
+ */
 .annotation {
-    background: rgba(255, 255, 0, .05);
-    padding: 4px 0;
-    color: #000
+    display: inline;
+    color: inherit;
+    font-style: normal;
+    padding: 0 0.14em;
+    margin: 0 0.02em;
+    border-radius: 0.4em;
+    cursor: pointer;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+    transition: background-color 0.18s ease, box-shadow 0.18s ease;
 }
 
-/*li {*/
-/*    text-align: -webkit-match-parent;*/
-/*}*/
-
-.annotation.shown {
-    cursor: pointer
-}
-
-#johns-editor .colors .color.yellow {
-    background: #ffde70
-}
-
-#johns-editor .colors .color.green {
-    background: #c4f5aa
-}
-
-#johns-editor .colors .color.pink {
-    background: #fd99bb
-}
-
-#johns-editor .colors .color.blue {
-    background: #b4ffeb
-}
-
-.annotation.null, .annotation.yellow {
-    background: #ffde70
+.annotation.null,
+.annotation.yellow {
+    background: rgba(248, 214, 109, 0.78);
 }
 
 .annotation.green {
-    background: #c4f5aa
+    background: rgba(190, 231, 165, 0.82);
 }
 
 .annotation.pink {
-    background: rgba(253, 153, 187, .7)
+    background: rgba(246, 166, 193, 0.78);
 }
 
 .annotation.blue {
-    background: #b4ffeb
+    background: rgba(158, 221, 248, 0.82);
 }
 
-.temporary {
-    background: #ffe89e;
-    padding: 4px 0
+.annotation.orange {
+    background: rgba(253, 186, 116, 0.82);
 }
 
-#johns-editor .errors {
-    font-size: .9em;
-    padding: 10px;
-    line-height: 28px
+.annotation.purple {
+    background: rgba(196, 181, 253, 0.82);
 }
 
+.annotation.mint {
+    background: rgba(153, 246, 228, 0.82);
+}
+
+.annotation.pearl {
+    background: rgba(226, 232, 240, 0.94);
+}
+
+.highlight-wrap-hover {
+    box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.18);
+}
+
+/*
+ * 小气泡编辑面板采用卡片结构。
+ * 使用明确的块级类名，后续追加动作或颜色时更容易定位。
+ */
 #johns-editor {
-    margin-top: 50px;
-    position: relative;
-    font-family: Helvetica Neue, Helvetica, sans-serif;
-    display: none;
     position: absolute;
-    -webkit-box-shadow: 0 3px 35px rgba(0, 0, 0, .21);
-    box-shadow: 0 3px 35px rgba(0, 0, 0, .21);
-    z-index: 2
+    display: none;
+    margin-top: 0;
+    z-index: 2;
 }
 
-#johns-editor:after {
-    top: -9px;
-    border-color: transparent transparent #fff
-}
-
-#johns-editor:after, #johns-editor:before {
+#johns-editor::before {
     content: "";
     position: absolute;
-    left:10px;
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 0 10px 10px
+    top: -8px;
+    left: 50%;
+    width: 14px;
+    height: 14px;
+    background: var(--johns-surface);
+    border-left: 1px solid var(--johns-border);
+    border-top: 1px solid var(--johns-border);
+    transform: translateX(-50%) rotate(45deg);
+    box-shadow: -6px -6px 14px rgba(15, 23, 42, 0.03);
 }
 
-#johns-editor:before {
-    top: -10px;
-    border-color: transparent transparent #bbb
+#johns-editor.editor-placement-top::before {
+    top: auto;
+    bottom: -8px;
+    border-left: 0;
+    border-top: 0;
+    border-right: 1px solid var(--johns-border);
+    border-bottom: 1px solid var(--johns-border);
+    box-shadow: 6px 6px 14px rgba(15, 23, 42, 0.03);
 }
 
-#johns-editor div.awesomplete > ul > li {
-    position: relative;
-    padding: .2em .5em;
-    cursor: pointer
+#johns-editor .editor-panel {
+    width: 220px;
+    border-radius: 16px;
+    border: 1px solid var(--johns-border);
+    background: var(--johns-surface);
+    box-shadow: var(--johns-shadow);
+    overflow: hidden;
 }
 
-#johns-editor .dropdown-list {
-    background: #fff;
-    display: inline-block;
-    width: 180px;
-    border-radius: 3px;
-    border: 1px solid #bbb;
-    -webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, .1), 0 3px 15px rgba(0, 0, 0, .15);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, .1), 0 3px 15px rgba(0, 0, 0, .15);
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    z-index: 10
+#johns-editor .editor-section {
+    padding: 12px;
 }
 
-#johns-editor .dropdown-list li {
-    border-bottom: 1px solid #eee;
-    position: relative;
-    padding: 0 10px
+#johns-editor .editor-section + .editor-section {
+    border-top: 1px solid rgba(13, 148, 136, 0.08);
 }
 
-#johns-editor .dropdown-list li.js-remove-annotation-wrapper {
-    display: none
-}
-
-#johns-editor .dropdown-list li a, #johns-editor .dropdown-list li span.link {
-    padding: 5px 0;
-    text-decoration: none;
-    display: block;
-    font-size: 14px;
-    color: #888;
-    line-height: 28px;
-    font-weight: 400;
+#johns-editor .editor-section-title {
+    margin-bottom: 8px;
+    color: var(--johns-text-muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    cursor: pointer
 }
 
-#johns-editor .dropdown-list li:hover {
-    background-color: #eee;
-    color: #888
+#johns-editor .editor-color-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
 }
 
-#johns-editor .dropdown-list li:hover .sub-list {
-    display: block
-}
-
-#johns-editor .dropdown-list li.js-facebook-share {
-    display: none
-}
-
-#johns-editor .dropdown-list li.note-input {
-    padding: 10px
-}
-
-#johns-editor .dropdown-list li.note-input:hover {
-    background: transparent
-}
-
-#johns-editor .dropdown-list li.note-input form {
-    margin: 0
-}
-
-#johns-editor .dropdown-list li.note-input input[type=text], #johns-editor .dropdown-list li.note-input textarea {
-    font-size: 12px;
-    color: #ddd;
-    border-width: 0;
-    background: transparent;
-    width: 160px;
-    color: #333;
-    outline: none;
-    line-height: 20px;
-    padding: 0 3px;
-    border: 1px solid #999;
-    max-width: 160px;
-    margin-bottom: 5px
-}
-
-#johns-editor .dropdown-list li.note-input input[type=text]:focus, #johns-editor .dropdown-list li.note-input textarea:focus {
-    border-color: #4d90fe;
-    -webkit-box-shadow: 0 0 1px rgba(77, 144, 254, .2);
-    box-shadow: 0 0 1px rgba(77, 144, 254, .2)
-}
-
-#johns-editor .dropdown-list li.note-input textarea {
-    max-height: 100px
-}
-
-#johns-editor .dropdown-list li.note-input #add-button {
-    height: 22px;
-    width: 80px;
-    font-size: 12px;
-    color: #fff;
-    text-align: center;
-    line-height: 18px;
-    border-width: 0;
-    background-color: #4d90fe;
+#johns-editor .editor-color-grid .color {
+    appearance: none;
+    width: 100%;
+    height: 26px;
+    border: 2px solid transparent;
+    border-radius: 999px;
     cursor: pointer;
-    margin-top: 10px
+    box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.05);
+    transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
 }
 
-#johns-editor .dropdown-list li .sub-list {
+#johns-editor .editor-color-grid .color:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+}
+
+#johns-editor .editor-color-grid .color.active {
+    border-color: rgba(17, 94, 89, 0.78);
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.14);
+}
+
+#johns-editor .editor-color-grid .color.yellow {
+    background: #f8d66d;
+}
+
+#johns-editor .editor-color-grid .color.green {
+    background: #bee7a5;
+}
+
+#johns-editor .editor-color-grid .color.pink {
+    background: #f6a6c1;
+}
+
+#johns-editor .editor-color-grid .color.blue {
+    background: #9eddf8;
+}
+
+#johns-editor .editor-color-grid .color.orange {
+    background: #fdba74;
+}
+
+#johns-editor .editor-color-grid .color.purple {
+    background: #c4b5fd;
+}
+
+#johns-editor .editor-color-grid .color.mint {
+    background: #99f6e4;
+}
+
+#johns-editor .editor-color-grid .color.pearl {
+    background: #e2e8f0;
+}
+
+#johns-editor .editor-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+#johns-editor .editor-action {
+    appearance: none;
+    width: 100%;
+    min-height: 34px;
+    padding: 0 11px;
+    border: 1px solid rgba(13, 148, 136, 0.08);
+    border-radius: 12px;
+    background: rgba(248, 250, 252, 0.92);
+    color: var(--johns-text);
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+}
+
+#johns-editor .editor-action:hover {
+    background: rgba(204, 251, 241, 0.62);
+    border-color: rgba(13, 148, 136, 0.2);
+    color: var(--johns-accent-strong);
+}
+
+#johns-editor .editor-action-danger {
+    color: #c2410c;
+    background: rgba(255, 247, 237, 0.95);
+    border-color: rgba(249, 115, 22, 0.16);
+}
+
+#johns-editor .editor-action-danger:hover {
+    color: #9a3412;
+    background: rgba(255, 237, 213, 0.98);
+    border-color: rgba(249, 115, 22, 0.28);
+}
+
+#johns-editor .editor-action-hidden {
     display: none;
-    position: absolute;
-    top: 0;
-    right: -182px
 }
 
-#johns-editor .dropdown-list li.colors {
-    padding: 8px 10px
+/*
+ * 备注输入改成扩展自己的弹窗风格。
+ * 默认 layer.prompt 太旧，这里把标题、输入框和按钮全部收成统一的轻卡片样式。
+ */
+.johns-note-layer {
+    border-radius: 18px !important;
+    overflow: hidden !important;
+    box-shadow: 0 20px 44px rgba(15, 23, 42, 0.18) !important;
 }
 
-#johns-editor .dropdown-list li.colors:hover {
-    background: transparent
+.johns-note-layer .layui-layer-title {
+    height: auto;
+    padding: 18px 22px 8px;
+    border-bottom: 0;
+    background: #ffffff;
+    color: var(--johns-text);
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.4;
 }
 
-#johns-editor .dropdown-list li.colors .color {
-    width: 20px;
-    height: 20px;
-    padding: 0;
-    margin: 0;
-    border-radius: 100%;
-    display: inline-block;
-    margin: 0 8px;
-    margin-top: 5px;
-    border: 2px solid #eee;
-    cursor: pointer
+.johns-note-layer .layui-layer-setwin {
+    top: 16px;
+    right: 16px;
 }
 
-#johns-editor .dropdown-list li.colors .color.active, #johns-editor .dropdown-list li.colors .color.active:hover {
-    border-color: #6e6e6e
+.johns-note-layer .layui-layer-setwin .layui-layer-close1 {
+    color: var(--johns-text-muted);
 }
 
-#johns-editor .dropdown-list li.colors .color:hover {
-    border-color: #a2a2a2
+.johns-note-layer .layui-layer-content {
+    padding: 0 !important;
+    overflow: visible !important;
+    background: #ffffff;
 }
 
-i.icon {
-    display: inline-block;
-    opacity: 1;
-    margin: 0 .25rem 0 0;
-    width: 1.18em;
-    height: 1em;
-    font-family: Icons;
-    font-style: normal;
-    font-weight: 400;
-    text-decoration: inherit;
-    text-align: center;
-    speak: none;
-    font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    -webkit-font-smoothing: antialiased;
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden
+.johns-note-dialog {
+    padding: 0 22px 0;
+    background: #ffffff;
 }
 
-i.icon:before {
-    background: none !important
+.johns-note-dialog-copy {
+    margin-bottom: 10px;
+    color: var(--johns-text-muted);
+    font-size: 12px;
+    line-height: 1.55;
 }
 
-h1:first-child {
-    color: #3c86c7;
-    padding-bottom: 0;
+.johns-note-textarea {
+    width: 100%;
+    min-height: 132px;
+    padding: 14px 15px;
+    box-sizing: border-box;
+    border: 1px solid rgba(13, 148, 136, 0.14);
+    border-radius: 14px;
+    background: rgba(248, 250, 252, 0.94);
+    color: var(--johns-text);
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.65;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
 }
 
-h1 + blockquote {
-    box-shadow: inset 5px 0 #ddd;
+.johns-note-textarea::placeholder {
+    color: rgba(100, 131, 129, 0.82);
 }
 
-h1 + blockquote p {
-    margin-top: 10px;
-    color: #aaa;
-    margin-bottom: 40px;
+.johns-note-textarea:focus {
+    border-color: rgba(13, 148, 136, 0.42);
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.1);
 }
 
+.johns-note-layer .layui-layer-btn {
+    padding: 14px 22px 18px;
+    border-top: 0;
+    background: #ffffff;
+}
+
+.johns-note-layer .layui-layer-btn a {
+    height: 36px;
+    line-height: 34px;
+    padding: 0 18px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.johns-note-layer .layui-layer-btn .layui-layer-btn0 {
+    border-color: var(--johns-accent-strong);
+    background: var(--johns-accent-strong);
+    color: #ffffff;
+}
+
+.johns-note-layer .layui-layer-btn .layui-layer-btn1 {
+    border-color: rgba(148, 163, 184, 0.28);
+    background: rgba(248, 250, 252, 0.92);
+    color: var(--johns-text);
+}
+
+/*
+ * 老的删除气泡保留，但统一成新主题颜色，避免完全失去可用性。
+ */
 .my-remove-tip {
     box-sizing: border-box;
     position: absolute;
-    border: 1px solid #fff;
-    border-radius: 3px;
-    height: 20px;
-    width: 40px;
-    color: #fff;
-    background: #444;
+    border: 1px solid rgba(13, 148, 136, 0.1);
+    border-radius: 10px;
+    height: 28px;
+    min-width: 64px;
+    padding: 0 10px;
+    color: #ffffff;
+    background: linear-gradient(135deg, var(--johns-accent), var(--johns-accent-strong));
     text-align: center;
     font-size: 12px;
+    font-weight: 700;
     cursor: pointer;
-    line-height: 18px;
+    line-height: 26px;
+    box-shadow: var(--johns-shadow-soft);
     overflow: visible;
 }
 
 .my-remove-tip::after {
     content: '';
     position: absolute;
-    left: 16px;
-    bottom: -4px;
-    border-color: #444 transparent transparent;
-    border-width: 4px 4px 0;
+    left: 24px;
+    bottom: -6px;
+    border-color: var(--johns-accent-strong) transparent transparent;
+    border-width: 6px 6px 0;
     border-style: solid;
     height: 0;
     width: 0;
 }
 
-.op-panel {
-    box-sizing: border-box;
-    padding: 1px 5px 6px 8px;
-    position: fixed;
-    top: 50px;
-    left: 15px;
-    background: rgba(0, 0, 0, .1);
-    border-radius: 3px;
-    border: 1px dashed #aaa;
+.johns-tag-goto {
+    color: var(--johns-accent-strong);
 }
 
-.op-panel a {
-    position: absolute;
-    right: 10px;
-    bottom: 12px;
-    height: 18px;
-    width: 18px;
-    opacity: .7;
-}
-
-.op-panel a:hover {
-    opacity: 1;
-}
-
-.op-panel svg {
-    height: 18px;
-    width: 18px;
-}
-
-.op-panel input[type="radio"] {
-    opacity: 1;
-    width: auto;
-    position: static;
-    line-height: normal;
-    height: 15px;
-    vertical-align: middle;
-    margin-right: 5px;
-}
-
-.op-panel .op-name {
-    margin-right: 0;
-}
-
-.op-panel label {
-    font-size: 12px;
-    margin-right: 2px;
-}
-
-.op-panel .op-btn {
-    display: block;
-    font-size: 12px;
-}
-
-.op-panel .op-btn.disabled {
-    cursor: not-allowed;
-}
-
-@media screen and (max-width: 1150px) {
-    main {
-        padding: 0 15px;
-        overflow-x: hidden;
-    }
-
-    .op-panel {
-        right: 5vw;
-        bottom: 5vh;
-        left: auto;
-        top: auto;
-        background-color: rgba(0, 0, 0, .9);
-        color: #fff;
+@media (prefers-reduced-motion: reduce) {
+    .annotation,
+    #johns-editor .editor-color-grid .color,
+    #johns-editor .editor-action {
+        transition: none;
     }
 }
-
-.highlight-wrap-hover {
-    background: #f7aaaa !important;
-}
-
-.gtx-johns-icon {
-    background-size: 19px;
-    height: 19px;
-    width: 19px;
-}
-
-#johns-ex-button {
-    /*line-height: 18px;*/
-    /*min-height: 18px;*/
-    /*background-color: #fafafa;*/
-    /*border: 1px solid rgba(0, 0, 0, .07);*/
-    /*border-radius: 1px;*/
-    /*-webkit-box-shadow: 0 6px 12px rgb(0 0 0 / 18%);*/
-    /*box-shadow: 0 6px 12px rgb(0 0 0 / 18%);*/
-    /*background-clip: padding-box;*/
-    /*padding: 5px 10px;*/
-    position: fixed;
-    /*/* background-color: rgba(255,255,255,0.98); */
-    left: 50px;
-    top: 68px;
-    /*font-size: 12px;*/
-    /*white-space: nowrap;*/
-    z-index: 9999999999999;
-    /*cursor: pointer;*/
-    /*text-align: left;*/
-    /*max-height: 70%;*/
-    overflow-y: auto;
-    overflow-x: hidden;
-    /*color: #00965e;*/
-    /*/*opacity:0.5;*/
-}
-
-/*#johns-ex-navbar ul {*/
-/*    display: none;*/
-/*    text-align: left;*/
-/*    padding-right: 10px;*/
-/*    padding-left: 0px;*/
-/*    !*list-style-type: disc !important;*!*/
-/*    !*list-style: disc inside !important;*!*/
-/*    margin-block-start: 1em;*/
-/*    margin-block-end: 1em;*/
-/*    margin-inline-start: 0px;*/
-/*    margin-inline-end: 0px;*/
-/*    padding-inline-start: 10px;*/
-/*}*/
-
-/*#johns-ex-navbar li {*/
-/*    padding-bottom: 15px;*/
-/*    font-size: 6px !important;*/
-/*    text-align: left;*/
-/*    list-style-type: disc !important;*/
-/*    list-style: disc inside !important;*/
-/*    color: #00b5ad !important;*/
-/*    !*border: 1px;*!*/
-/*}*/
-
-/*.johns-fa {*/
-/*    display: inline-block;*/
-/*    font: normal normal normal 14px/1 FontAwesome;*/
-/*    font-size: inherit;*/
-/*    text-rendering: auto;*/
-/*    -webkit-font-smoothing: antialiased;*/
-/*    -moz-osx-font-smoothing: grayscale;*/
-/*}*/
-
-.johns-tag-goto{
-    color: #00965e;
-}
-
-
-/*.johns-nav-button {*/
-/*    background: transparent;*/
-/*    border: none;*/
-/*    display: block;*/
-/*    height: 32px;*/
-/*    margin-left: 15px;*/
-/*    position: fixed;*/
-/*    !*top: 20px;*!*/
-/*    width: 32px;*/
-/*    !*left: 50px;*!*/
-/*    !*top: 68px;*!*/
-/*    z-index: 999999999;*/
-/*    -webkit-appearance: button;*/
-/*    cursor: pointer;*/
-/*}*/

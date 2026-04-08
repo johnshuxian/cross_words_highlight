@@ -1,23 +1,81 @@
-* {
-  /*padding: 0;*/
-  /*margin: 0;*/
-}
+/*
+ * 这一层只放全局设计变量和悬浮按钮样式。
+ * 颜色、菜单、配置页分别在各自文件里维护，避免一个文件承担太多职责。
+ */
 :root {
-  --menu-speed: 0.75s;
+  --johns-accent: #0d9488;
+  --johns-accent-strong: #115e59;
+  --johns-accent-soft: #ccfbf1;
+  --johns-surface: rgba(255, 255, 255, 0.96);
+  --johns-surface-muted: rgba(240, 253, 250, 0.96);
+  --johns-border: rgba(13, 148, 136, 0.16);
+  --johns-shadow: 0 20px 45px rgba(15, 23, 42, 0.14);
+  --johns-shadow-soft: 0 10px 24px rgba(15, 23, 42, 0.12);
+  --johns-text: #163533;
+  --johns-text-muted: #648381;
+  --johns-action: #f97316;
+  --menu-speed: 0.24s;
 }
-/*body {*/
-/*  font-family: "Roboto";*/
-/*  line-height: 1.4;*/
-/*  !*background: url("https://source.unsplash.com/WoZgy7ZwgBI/1920x1080") no-repeat center center/cover;*!*/
-/*   height: 100vh;*/
-/*  width: 100vw;*/
-/*  overflow: hidden;*/
-/*}*/
-/*main {*/
-/*  margin: 150px auto;*/
-/*  max-width: 728px;*/
-/*  padding: 2rem;*/
-/*  background-color: #fafafa;*/
-/*  border-radius: 3px;*/
-/*  text-align: center;*/
-/*}*/
+
+/*
+ * 统一禁掉老旧默认样式的影响，悬浮按钮和面板都走同一套视觉变量。
+ */
+#johns-highlight,
+#johns-editor,
+#johns-menu-drag {
+  font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+/*
+ * 划词后的悬浮入口改成紧凑工具按钮，避免用 emoji 造成风格割裂。
+ */
+#johns-highlight {
+  position: absolute;
+}
+
+.gtx-johns-icon {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 0 10px 0 9px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--johns-accent), var(--johns-accent-strong));
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  box-shadow: var(--johns-shadow-soft);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+}
+
+.gtx-johns-icon::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.18);
+}
+
+.gtx-johns-icon:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 28px rgba(13, 148, 136, 0.26);
+}
+
+.gtx-johns-icon:focus {
+  outline: 2px solid rgba(249, 115, 22, 0.45);
+  outline-offset: 2px;
+}
+
+/*
+ * 降低动画强度，兼顾偏好减少动效的用户。
+ */
+@media (prefers-reduced-motion: reduce) {
+  .gtx-johns-icon {
+    transition: none;
+  }
+}

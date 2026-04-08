@@ -1,0 +1,773 @@
+/*
+ * 配置页改成更平、更紧凑的结构。
+ * 目标是把可视空间尽量留给已保存页面列表，而不是顶部装饰模块。
+ */
+:root {
+    --config-bg: #f4f6f8;
+    --config-surface: #ffffff;
+    --config-border: #d9e1e8;
+    --config-border-strong: #c7d2dc;
+    --config-text: #1f2933;
+    --config-muted: #66788a;
+    --config-primary: #0f766e;
+    --config-primary-soft: #dff3f0;
+    --config-danger: #c2410c;
+    --config-danger-soft: #fff1eb;
+    --config-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
+}
+
+html,
+body {
+    height: 100%;
+    min-height: 100%;
+}
+
+body {
+    margin: 0;
+    padding: 12px;
+    box-sizing: border-box;
+    overflow: hidden;
+    background: var(--config-bg);
+    color: var(--config-text);
+    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+#app {
+    height: 100%;
+}
+
+/*
+ * popup 和 options 共用一个 html。
+ * popup 必须显式给宽高，不然浏览器会按最小内容宽度压成一条细缝。
+ */
+html.page-popup,
+body.page-popup {
+    width: 800px;
+    min-width: 800px;
+    max-width: 800px;
+    height: 580px;
+    min-height: 580px;
+    max-height: 580px;
+    overflow-x: hidden;
+}
+
+body.page-popup {
+    padding: 10px;
+}
+
+html.page-options,
+body.page-options {
+    min-width: 960px;
+}
+
+.config-shell {
+    max-width: 1320px;
+    height: calc(100vh - 24px);
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-bottom: 52px;
+    box-sizing: border-box;
+}
+
+body.page-popup .config-shell {
+    width: 100%;
+    max-width: none;
+    height: calc(100vh - 20px);
+    padding-bottom: 0;
+}
+
+body.page-popup .config-table .el-table__row td {
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+body.page-popup .source-cell {
+    gap: 8px;
+}
+
+body.page-popup .source-avatar {
+    width: 34px;
+    height: 34px;
+}
+
+body.page-popup .source-title {
+    font-size: 13px;
+    line-height: 1.3;
+}
+
+body.page-popup .source-host {
+    font-size: 11px;
+}
+
+body.page-popup .source-meta-line {
+    gap: 6px;
+}
+
+body.page-popup .source-meta-group {
+    gap: 6px;
+    margin-left: 22px;
+}
+
+body.page-popup .source-meta-chip {
+    font-size: 11px;
+}
+
+body.page-popup .timestamp-text {
+    font-size: 11px;
+}
+
+body.page-popup .action-group {
+    gap: 6px;
+}
+
+body.page-popup .action-group .el-button--text {
+    font-size: 12px;
+}
+
+body.page-popup .detail-toolbar {
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+body.page-popup .detail-toolbar h3 {
+    font-size: 14px;
+}
+
+body.page-popup .detail-toolbar p {
+    font-size: 11px;
+}
+
+body.page-popup .detail-search {
+    width: 170px;
+}
+
+body.page-popup .detail-search .el-input__inner {
+    height: 34px;
+}
+
+body.page-popup .detail-dialog .el-dialog__header {
+    padding: 12px 12px 0;
+}
+
+body.page-popup .detail-dialog .el-dialog__body {
+    padding: 8px 12px 12px;
+}
+
+body.page-popup .detail-dialog .el-dialog__footer {
+    padding: 0 12px 12px;
+}
+
+body.page-popup .detail-excerpt,
+body.page-popup .detail-comment {
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+body.page-popup .detail-comment-view,
+body.page-popup .detail-comment-editor .el-textarea__inner {
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+body.page-popup .detail-color-dot {
+    width: 14px;
+    height: 14px;
+}
+
+body.page-popup .detail-dialog .config-table .el-table__row td {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+body.page-popup .detail-dialog .el-button--text {
+    font-size: 12px;
+}
+
+/*
+ * 顶部只保留标题和搜索。
+ * 语言切换、扩展开关都移到底部控制条，避免继续占据首屏高度。
+ */
+.config-topbar {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.config-topbar-copy {
+    min-width: 0;
+}
+
+.config-topbar-title {
+    margin: 0;
+    font-size: 28px;
+    line-height: 1.1;
+    font-weight: 700;
+}
+
+.config-topbar-description {
+    margin: 6px 0 0;
+    color: var(--config-muted);
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.table-search {
+    width: 260px;
+    flex: 0 0 auto;
+}
+
+.table-search .el-input__inner,
+.detail-search .el-input__inner {
+    height: 38px;
+    border: 1px solid var(--config-border);
+    border-radius: 8px;
+    background: #ffffff;
+}
+
+.table-search .el-input__inner:focus,
+.detail-search .el-input__inner:focus {
+    border-color: var(--config-primary);
+}
+
+/*
+ * 主列表卡片占据剩余空间。
+ * 用固定高度表格承接内容，避免整页继续出现长滚动。
+ */
+.panel-card {
+    border: 1px solid var(--config-border);
+    border-radius: 10px;
+    background: var(--config-surface);
+    box-shadow: var(--config-shadow);
+}
+
+.panel-card-library {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
+    box-sizing: border-box;
+}
+
+.panel-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.panel-card-title {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.2;
+    font-weight: 700;
+}
+
+.panel-card-description {
+    margin: 4px 0 0;
+    color: var(--config-muted);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.config-table {
+    border: 1px solid var(--config-border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.config-table::before {
+    display: none;
+}
+
+.config-table .el-table__header th {
+    background: #f8fafb;
+    color: var(--config-muted);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.config-table .el-table__row td {
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+.config-table .el-table__row.success-row > td {
+    background: #fbfcfd;
+}
+
+.config-table .el-table__row:hover > td {
+    background: #f5f8fa !important;
+}
+
+.source-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.source-avatar {
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    background: #eef2f5;
+    color: var(--config-text);
+    font-weight: 700;
+}
+
+.source-copy {
+    min-width: 0;
+}
+
+.source-title {
+    color: var(--config-text);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+    display: -webkit-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.source-meta-line {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+    min-width: 0;
+}
+
+.source-host,
+.source-meta-chip {
+    color: var(--config-muted);
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.source-meta-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 14px;
+    white-space: nowrap;
+}
+
+.source-meta-chip {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.timestamp-text {
+    color: var(--config-text);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+}
+
+.action-group {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    white-space: nowrap;
+}
+
+.action-group .el-button + .el-button {
+    margin-left: 0;
+}
+
+.action-group .el-button--text {
+    padding: 0;
+    color: var(--config-primary);
+    font-weight: 600;
+}
+
+.action-group .el-button--text.is-danger {
+    color: var(--config-danger);
+}
+
+.panel-card-footer {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    min-height: 40px;
+    margin-top: 8px;
+    padding-top: 8px;
+    gap: 12px;
+    box-sizing: border-box;
+}
+
+.panel-card-footer-with-dock {
+    justify-content: space-between;
+}
+
+.panel-card-footer .el-pagination {
+    flex: 0 0 auto;
+}
+
+.panel-card-footer-with-dock .config-pagination {
+    margin-left: auto;
+}
+
+/*
+ * popup 底部分页条里的总数、页大小、页码按钮来自 Element UI 的不同子组件。
+ * 默认它们各自使用不同的高度和行高，看起来就会一高一低。
+ * 这里统一成同一条 32px 基线，保证“5条/页”和左右页码视觉齐平。
+ */
+body.page-popup .panel-card-footer .config-pagination {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    min-height: 32px;
+}
+
+body.page-popup .panel-card-footer .config-pagination .el-pagination__total,
+body.page-popup .panel-card-footer .config-pagination .el-pagination__jump,
+body.page-popup .panel-card-footer .config-pagination .btn-prev,
+body.page-popup .panel-card-footer .config-pagination .btn-next,
+body.page-popup .panel-card-footer .config-pagination .el-pager li {
+    height: 32px;
+    line-height: 32px;
+}
+
+body.page-popup .panel-card-footer .config-pagination .el-pagination__sizes {
+    display: inline-flex;
+    align-items: center;
+    height: 32px;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+body.page-popup .panel-card-footer .config-pagination .el-pagination__sizes .el-input__inner {
+    height: 32px;
+    line-height: 32px;
+}
+
+body.page-popup .panel-card-footer .config-pagination .el-pagination__sizes .el-input .el-select__caret {
+    line-height: 32px;
+}
+
+body.page-popup .panel-card-footer {
+    min-height: 34px;
+    margin-top: 6px;
+    padding-top: 6px;
+}
+
+/*
+ * 左下角控制条只保留紧凑交互。
+ * 不再展示大段解释文案，只通过 hover title 说明用途。
+ */
+.config-dock {
+    position: fixed;
+    left: 12px;
+    bottom: 12px;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.config-dock-inline {
+    position: static;
+    left: auto;
+    bottom: auto;
+    z-index: auto;
+}
+
+.dock-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    padding: 4px;
+    border: 1px solid var(--config-border);
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: var(--config-shadow);
+    box-sizing: border-box;
+}
+
+body.page-popup .config-dock-inline .dock-control {
+    width: 88px;
+    min-width: 88px;
+    height: 36px;
+    min-height: 36px;
+    justify-content: center;
+    padding: 3px 8px;
+}
+
+body.page-popup .config-dock-inline .dock-language {
+    gap: 4px;
+}
+
+body.page-popup .config-dock-inline .dock-language button {
+    width: 34px;
+    min-width: 34px;
+    height: 28px;
+}
+
+body.page-popup .config-dock-inline .dock-switch {
+    gap: 8px;
+    padding: 0 8px;
+}
+
+.dock-language {
+    gap: 4px;
+}
+
+.dock-language button {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    min-width: 38px;
+    height: 30px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--config-muted);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.dock-language button.is-active {
+    background: var(--config-primary);
+    color: #ffffff;
+}
+
+.dock-switch {
+    min-width: 72px;
+    justify-content: center;
+    padding: 0 12px;
+}
+
+.dock-switch .el-switch {
+    flex: 0 0 auto;
+}
+
+.dock-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: #cbd5e1;
+}
+
+.dock-status-dot.is-active {
+    background: var(--config-primary);
+}
+
+/*
+ * 详情弹窗继续保留，但视觉也收平。
+ * 颜色列只显示色块，不再显示颜色名。
+ */
+.detail-toolbar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.detail-toolbar h3 {
+    margin: 0 0 4px;
+    font-size: 16px;
+    line-height: 1.2;
+}
+
+.detail-toolbar p {
+    margin: 0;
+    color: var(--config-muted);
+    font-size: 12px;
+    line-height: 1.45;
+    word-break: break-all;
+}
+
+.detail-search {
+    width: 220px;
+}
+
+.detail-excerpt,
+.detail-comment {
+    display: inline-flex;
+    align-items: center;
+    width: 100%;
+    padding: 0;
+    color: var(--config-text);
+    font-size: 13px;
+    line-height: 1.55;
+    text-align: left;
+}
+
+.detail-text-clamp,
+.detail-comment-view {
+    display: -webkit-box;
+    width: 100%;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    white-space: normal;
+    word-break: break-word;
+    text-overflow: ellipsis;
+}
+
+.detail-dialog .config-table .el-table__body td {
+    vertical-align: middle;
+}
+
+.detail-comment.is-empty {
+    color: var(--config-muted);
+}
+
+.detail-comment-cell {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 34px;
+    cursor: text;
+}
+
+.detail-comment-view {
+    width: 100%;
+    color: var(--config-text);
+    font-size: 13px;
+    line-height: 1.55;
+    text-align: left;
+}
+
+.detail-comment-view.is-empty {
+    color: var(--config-muted);
+}
+
+.detail-comment-editor {
+    width: 100%;
+}
+
+.detail-comment-editor .el-textarea__inner {
+    min-height: 58px !important;
+    padding: 6px 8px;
+    border: 1px solid var(--config-border);
+    border-radius: 6px;
+    color: var(--config-text);
+    font-size: 13px;
+    line-height: 1.45;
+    resize: vertical;
+}
+
+.detail-comment-editor .el-textarea__inner:focus {
+    border-color: var(--config-primary);
+}
+
+.detail-color-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.detail-color-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.detail-dialog {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+}
+
+.detail-dialog .el-dialog__header {
+    padding: 16px 18px 0;
+}
+
+.detail-dialog .el-dialog__title {
+    color: var(--config-text);
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.detail-dialog .el-dialog__body {
+    padding: 10px 18px 18px;
+}
+
+.detail-dialog .el-dialog__footer {
+    padding: 0 18px 18px;
+}
+
+/*
+ * Element UI 组件只做最少量主题化。
+ * 控件边框统一，避免继续出现高饱和渐变组件。
+ */
+.config-shell .el-switch__label {
+    display: none;
+}
+
+.config-shell .el-switch__core {
+    border-color: var(--config-border-strong);
+}
+
+.config-shell .el-switch.is-checked .el-switch__core {
+    border-color: var(--config-primary);
+    background-color: var(--config-primary);
+}
+
+.config-shell .el-button--primary {
+    border-color: var(--config-primary);
+    background: var(--config-primary);
+}
+
+.config-shell .el-button--primary:hover,
+.config-shell .el-button--primary:focus {
+    border-color: var(--config-primary);
+    background: var(--config-primary);
+}
+
+.config-shell .el-button:not(.el-button--text),
+.detail-dialog .el-button:not(.el-button--text) {
+    border-radius: 6px;
+}
+
+@media (max-width: 900px) {
+    body {
+        padding: 10px;
+    }
+
+    .config-shell {
+        height: calc(100vh - 20px);
+        padding-bottom: 50px;
+    }
+
+    .config-topbar,
+    .detail-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .table-search,
+    .detail-search {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dock-language button {
+        transition: none;
+    }
+}
